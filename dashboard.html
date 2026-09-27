@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sovereign — Engine Dashboard</title>
+    <meta
+      name="description"
+      content="Local dashboard for the Sovereign optimization engine: live status, benchmark evidence and an interactive solve runner."
+    />
+    <!--
+      No remote preconnects, no CDN assets, no analytics. This app is served from
+      127.0.0.1 and must work with the network disconnected.
+
+      Font paths are /dashboard-scoped, not /-absolute. The release ships two
+      front ends in one directory and the landing page owns /fonts with a
+      different display face (Bubbledot, not Outfit). Using bare /fonts here
+      would silently load the wrong typeface.
+    -->
+    <link
+      rel="preload"
+      href="/dashboard/fonts/inter-400-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/dashboard/fonts/outfit-500-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/dashboard/fonts/fonts.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
