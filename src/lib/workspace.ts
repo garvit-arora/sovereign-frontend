@@ -5,7 +5,7 @@ export type Machine = {
 export type Job = {
   id: string; name: string; state: string; created: number; updated: number
   worker_id?: string; device: string; target?: string; message?: string
-  routing?: { preferred_device: string; execution_device?: string | null; reason: string }
+  routing?: { preferred_device: string; execution_device?: string | null; reason: string; shape?: { problem_type?: string } }
   solver_status?: string; runtime_seconds?: number; gpu_used?: boolean
   result?: {
     status: string; objective_value?: number | null; runtime_seconds?: number; optimality_gap?: number
@@ -50,9 +50,3 @@ export async function request<T>(path: string, method = 'GET', body?: unknown): 
   }
   return data as T
 }
-export const SAMPLE = JSON.stringify({
-  problem_type: 'MILP', sense: 'maximize',
-  variables: ['a', 'b', 'c'].map(name => ({ name, type: 'binary', lower_bound: 0, upper_bound: 1 })),
-  objective: { linear: { a: 5, b: 4, c: 3 } },
-  constraints: [{ name: 'capacity', linear: { a: 1, b: 1, c: 1 }, sense: '<=', rhs: 2 }],
-}, null, 2)

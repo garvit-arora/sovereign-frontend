@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { User } from 'firebase/auth'
+import { Loader2 } from 'lucide-react'
 import { CloudDashboard } from '@/components/CloudDashboard'
+import { SovereignMark } from '@/components/SovereignMark'
 import { waitForUser } from '@/lib/firebase'
 import '@/workspace.css'
 
@@ -24,7 +26,12 @@ export default function App() {
   }, [])
 
   if (!ready || !user) {
-    return <div className="workspace"><main style={{ padding: '48px 24px' }}>Checking your session…</main></div>
+    return <div className="workspace workspace-loading">
+      <div className="loading-card" role="status">
+        <SovereignMark size={30} />
+        <p><Loader2 size={14} className="spin" />Checking your session…</p>
+      </div>
+    </div>
   }
 
   return <CloudDashboard user={user} />

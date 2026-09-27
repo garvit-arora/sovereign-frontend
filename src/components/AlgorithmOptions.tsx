@@ -1,7 +1,7 @@
 import type { Algorithms } from '@/lib/algorithms'
 export function AlgorithmOptions({ value, onChange }: { value: Algorithms; onChange: (next: Algorithms) => void }) {
   const set = (key: keyof Algorithms, next: string | boolean | number) => onChange({ ...value, [key]: next })
-  return <section className="algorithm-options"><h3>Choose your algorithms</h3><p>LP choices also apply to MILP node relaxations. QP uses its own method.</p><div className="form-grid">
+  return <section className="algorithm-options"><h3>Solver settings</h3><p>LP choices also apply to MILP node relaxations. QP uses its own method.</p><div className="form-grid">
     <label>LP method<select value={value.algorithm} onChange={e => set('algorithm', e.target.value)}><option value="auto">Automatic (interior point + fallback)</option><option value="simplex">Revised simplex</option><option value="ipm">Primal-dual interior point</option></select></label>
     <label>QP method<select value={value.qpAlgorithm} onChange={e => set('qpAlgorithm', e.target.value)}><option value="auto">Automatic</option><option value="ipm">Primal-dual interior point</option><option value="frank_wolfe">Frank–Wolfe</option></select></label>
     <label>MILP method<select value={value.milpMethod} onChange={e => set('milpMethod', e.target.value)}><option value="branch_and_cut">Branch-and-cut</option><option value="branch_and_bound">Branch-and-bound (cuts off)</option></select></label>
