@@ -26,5 +26,5 @@ export async function getIdToken(): Promise<string | null> {
 
 export async function logout() {
   await signOut(auth)
-  window.location.href = '/landing/'
+  window.location.href = '/'
 }

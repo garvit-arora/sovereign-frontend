@@ -1,32 +1,139 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sovereign — Workspace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Intelligence Designed To Evolve</title>
     <meta
       name="description"
-      content="Sovereign is an independent LP, MILP and convex QP solver written from mathematical foundations, with independently verified solutions."
-    />
-    <!-- Fonts are served with the dashboard; no external font request is needed. -->
-    <link
-      rel="preload"
-      href="%BASE_URL%fonts/inter-400-latin.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
+      content="Build applications that reason, adapt and collaborate using a modular AI platform designed for production."
     />
     <link
-      rel="preload"
-      href="%BASE_URL%fonts/outfit-500-latin.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
     />
-    <link rel="stylesheet" href="%BASE_URL%fonts/fonts.css" />
+    <link
+      href="https://db.onlinewebfonts.com/c/8cb707a9b8a73f8a7403336b861c3074?family=BubbledotICG-FinePos"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="/landing/styles.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div class="bg" aria-hidden="true">
+      <video class="bg-video" autoplay muted loop playsinline>
+        <source
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"
+          type="video/mp4"
+        />
+      </video>
+    </div>
+
+    <div class="page">
+      <header class="header">
+        <a class="logo" href="/" aria-label="Home">
+          <img src="/landing/assets/logo.webp" alt="" width="52" height="52" />
+        </a>
+
+        <nav class="nav" aria-label="Primary">
+          <a class="nav-link is-active" href="/">Home</a>
+          <a class="nav-link" href="#product">Product</a>
+          <a class="nav-link" href="#case-studies">Case Studies</a>
+          <a class="nav-link" href="#contact">Contact</a>
+        </nav>
+
+        <a class="signin" href="/login">Sign in</a>
+
+        <button
+          class="burger"
+          type="button"
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          <span></span><span></span><span></span>
+        </button>
+      </header>
+
+      <main class="hero">
+        <div class="trust anim" style="--d: 0.05s">
+          <span class="trust-avatar" style="--z: 1">
+            <span class="trust-ring">
+              <span class="trust-inner">
+                <i class="fa-brands fa-microsoft" aria-hidden="true"></i>
+              </span>
+            </span>
+          </span>
+          <span class="trust-avatar" style="--z: 2">
+            <span class="trust-ring">
+              <span class="trust-inner">
+                <i class="fa-brands fa-amazon" aria-hidden="true"></i>
+              </span>
+            </span>
+          </span>
+          <span class="trust-avatar" style="--z: 4">
+            <span class="trust-ring">
+              <span class="trust-inner">
+                <i class="fa-brands fa-google" aria-hidden="true"></i>
+              </span>
+            </span>
+          </span>
+          <span class="trust-pill">Trusted by 2000+ Enterprises</span>
+        </div>
+
+        <h1 class="headline anim" style="--d: 0.12s">
+          <span>Intelligence</span>
+          <span>Designed To Evolve</span>
+        </h1>
+
+        <p class="subhead anim" style="--d: 0.28s">
+          Build applications that reason, adapt and collaborate using a modular
+          AI platform designed for production.
+        </p>
+
+        <a class="cta anim" style="--d: 0.4s" href="/login">Get Started</a>
+      </main>
+
+      <footer class="stats" aria-label="Platform metrics">
+        <div class="stat anim" style="--d: 0.5s">
+          <span class="stat-icon">&lt;</span>
+          <span class="stat-value" data-count="120" data-suffix="ms" data-decimals="0">0</span>
+          <span class="stat-label">Inference Time</span>
+        </div>
+        <div class="stat anim" style="--d: 0.58s">
+          <span class="stat-icon">%</span>
+          <span class="stat-value" data-count="99.99" data-suffix="%" data-decimals="2">0</span>
+          <span class="stat-label">Platform Uptime</span>
+        </div>
+        <div class="stat anim" style="--d: 0.66s">
+          <span class="stat-icon">*</span>
+          <span class="stat-value" data-count="24" data-suffix="/7" data-decimals="0">0</span>
+          <span class="stat-label">Autonomous Runtime</span>
+        </div>
+        <div class="stat anim" style="--d: 0.74s">
+          <span class="stat-icon">#</span>
+          <span class="stat-value" data-count="2.4" data-suffix="M" data-decimals="1">0</span>
+          <span class="stat-label">Context Windows</span>
+        </div>
+      </footer>
+    </div>
+
+    <div class="overlay" id="mobile-menu" hidden>
+      <div class="sheet">
+        <a class="sheet-link is-active" href="/">Home</a>
+        <a class="sheet-link" href="#product">Product</a>
+        <a class="sheet-link" href="#case-studies">Case Studies</a>
+        <a class="sheet-link" href="#contact">Contact</a>
+        <a class="sheet-signin" href="/login">Sign in</a>
+      </div>
+    </div>
+
+    <script src="/landing/main.js"></script>
   </body>
 </html>

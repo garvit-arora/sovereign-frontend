@@ -26,7 +26,7 @@ export function CloudDashboard() {
     catch (e) {
       if (e instanceof WorkspaceError && e.status === 401) {
         const next = `${window.location.pathname}${window.location.search}`
-        window.location.replace(`/login.html?next=${encodeURIComponent(next || '/')}`)
+        window.location.replace(`/login?next=${encodeURIComponent(next || '/app')}`)
         return
       }
       setError((e as Error).message)

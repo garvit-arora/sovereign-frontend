@@ -1,33 +1,10 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import fs from 'node:fs'
 import path from 'node:path'
-import type { Connect, Plugin } from 'vite'
 import { defineConfig, loadEnv } from 'vite'
 
-function landingDevRouting(): Plugin {
-  const landingRoot = path.resolve(import.meta.dirname, 'public/landing')
-  const landingIndex = path.join(landingRoot, 'index.html')
-
-  return {
-    name: 'landing-dev-routing',
-    configureServer(server) {
-      server.middlewares.use((req: Connect.IncomingMessage, res, next) => {
-        const url = req.url?.split('?')[0] ?? ''
-        if (url === '/' || url === '/index.html') {
-          res.statusCode = 200
-          res.setHeader('Content-Type', 'text/html; charset=utf-8')
-          res.end(fs.readFileSync(landingIndex))
-          return
-        }
-        next()
-      })
-    },
-  }
-}
-
 // The development server stays on loopback and forwards browser API calls to the
-// selected coordinator. Production routing is configured separately in vercel.js.
+// selected coordinator. Production routing is configured separately in vercel.json.
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, import.meta.dirname, 'SOVEREIGN_')
   const backend = process.env.SOVEREIGN_BACKEND_URL || env.SOVEREIGN_BACKEND_URL || 'http://127.0.0.1:8000'
@@ -35,7 +12,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: '/',
-    plugins: [landingDevRouting(), react(), tailwindcss()],
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
         '@': path.resolve(import.meta.dirname, './src'),
@@ -44,6 +21,12 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       emptyOutDir: true,
+      rollupOptions: {
+        input: {
+          landing: path.resolve(import.meta.dirname, 'index.html'),
+          app: path.resolve(import.meta.dirname, 'app/index.html'),
+        },
+      },
     },
     server: {
       host: '127.0.0.1',
@@ -52,14 +35,10 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: backend,
           changeOrigin: true,
-          // Render checks the Origin on authenticated browser requests. This
-          // trusted loopback-only development proxy speaks as the backend origin.
           headers: { Origin: backendOrigin },
           configure(proxy) {
             if (!backend.startsWith('https://')) return
             proxy.on('proxyRes', (response) => {
-              // Browsers cannot return a Secure cookie to an HTTP local preview.
-              // This changes only the local proxy response, never Render's cookie.
               const cookies = response.headers['set-cookie']
               if (cookies) response.headers['set-cookie'] = cookies.map(cookie => cookie.replace(/;\s*Secure(?=;|$)/gi, ''))
             })

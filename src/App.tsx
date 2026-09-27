@@ -11,7 +11,7 @@ export default function App() {
     return watchAuth((user) => {
       if (!user) {
         const next = `${window.location.pathname}${window.location.search}`
-        window.location.replace(`/login.html?next=${encodeURIComponent(next || '/app')}`)
+        window.location.replace(`/login?next=${encodeURIComponent(next || '/app')}`)
         return
       }
       setSignedIn(true)
