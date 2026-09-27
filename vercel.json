@@ -9,6 +9,14 @@
       "destination": "https://sovereign-we6b.onrender.com/api/:path*"
     },
     {
+      "source": "/landing/:path*",
+      "destination": "/landing/:path*"
+    },
+    {
+      "source": "/login.html",
+      "destination": "/login.html"
+    },
+    {
       "source": "/app",
       "destination": "/index.html"
     },

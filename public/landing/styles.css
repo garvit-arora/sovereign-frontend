@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Geist Pixel Circle';
-  src: url('/landing/fonts/GeistPixel-Circle.woff2') format('woff2');
+  src: url('fonts/GeistPixel-Circle.woff2') format('woff2');
   font-weight: 400;
   font-display: swap;
 }
@@ -45,7 +45,7 @@ body {
 }
 
 .bg {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: var(--bg);
   overflow: hidden;
@@ -75,6 +75,8 @@ body {
 }
 
 .header {
+  position: relative;
+  z-index: 1;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -186,6 +188,8 @@ body {
 }
 
 .hero {
+  position: relative;
+  z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -338,7 +342,11 @@ body {
     0 0 22px rgba(255, 255, 255, 0.32),
     0 0 44px rgba(255, 255, 255, 0.12);
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
-  animation-name: revealPulse;
+}
+
+.cta.anim {
+  animation: revealPulse 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--d, 0s);
 }
 
 .cta:hover {
@@ -350,6 +358,8 @@ body {
 }
 
 .stats {
+  position: relative;
+  z-index: 1;
   flex: 0 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);

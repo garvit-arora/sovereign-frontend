@@ -1,7 +1,30 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import fs from 'node:fs'
 import path from 'node:path'
+import type { Connect, Plugin } from 'vite'
 import { defineConfig, loadEnv } from 'vite'
+
+function landingDevRouting(): Plugin {
+  const landingRoot = path.resolve(import.meta.dirname, 'public/landing')
+  const landingIndex = path.join(landingRoot, 'index.html')
+
+  return {
+    name: 'landing-dev-routing',
+    configureServer(server) {
+      server.middlewares.use((req: Connect.IncomingMessage, res, next) => {
+        const url = req.url?.split('?')[0] ?? ''
+        if (url === '/' || url === '/index.html') {
+          res.statusCode = 200
+          res.setHeader('Content-Type', 'text/html; charset=utf-8')
+          res.end(fs.readFileSync(landingIndex))
+          return
+        }
+        next()
+      })
+    },
+  }
+}
 
 // The development server stays on loopback and forwards browser API calls to the
 // selected coordinator. Production routing is configured separately in vercel.js.
@@ -12,7 +35,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: '/',
-    plugins: [react(), tailwindcss()],
+    plugins: [landingDevRouting(), react(), tailwindcss()],
     resolve: {
       alias: {
         '@': path.resolve(import.meta.dirname, './src'),
