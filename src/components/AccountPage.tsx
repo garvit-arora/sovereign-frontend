@@ -1,4 +1,4 @@
-import { ArrowRight, LogOut, Mail, Shield, UserRound } from 'lucide-react'
+import { LogOut, Mail, Shield, UserRound } from 'lucide-react'
 import type { User } from 'firebase/auth'
 import { logout } from '@/lib/firebase'
 import { userDisplayName, userMemberSince, userProviderLabel } from '@/lib/user'
@@ -9,10 +9,9 @@ type Props = {
   user: User
   data: Workspace
   ready: boolean
-  onOpenSettings: () => void
 }
 
-export function AccountPage({ user, data, ready, onOpenSettings }: Props) {
+export function AccountPage({ user, data, ready }: Props) {
   const online = data.workers.filter((worker) => worker.online).length
 
   return (
@@ -58,9 +57,6 @@ export function AccountPage({ user, data, ready, onOpenSettings }: Props) {
       <section className="surface account-card">
         <div className="surface-heading"><h2>Account actions</h2></div>
         <div className="account-actions">
-          <button className="secondary-button" type="button" onClick={onOpenSettings}>
-            Workspace settings<ArrowRight size={15} />
-          </button>
           <button
             className="secondary-button danger-text"
             type="button"
