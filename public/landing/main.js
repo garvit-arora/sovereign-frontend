@@ -33,7 +33,9 @@
   }
 
   function initStats() {
-    var values = Array.prototype.slice.call(document.querySelectorAll('.stat-value'));
+    var values = Array.prototype.slice.call(
+      document.querySelectorAll('.metric-value[data-count]')
+    );
     if (!values.length) return;
 
     var fired = false;
@@ -44,16 +46,12 @@
       values.forEach(function (el, i) {
         setTimeout(function () {
           runCount(el, i);
-        }, 480 + i * 90);
+        }, 120 + i * 90);
       });
     }
 
     if (!('IntersectionObserver' in window)) {
-      values.forEach(function (el, i) {
-        setTimeout(function () {
-          runCount(el, i);
-        }, 480 + i * 90);
-      });
+      fireAll();
       return;
     }
 
@@ -66,10 +64,38 @@
           }
         });
       },
-      { threshold: 0.25 }
+      { threshold: 0.2 }
     );
 
     values.forEach(function (el) {
+      io.observe(el);
+    });
+  }
+
+  function initReveal() {
+    var blocks = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+    if (!blocks.length) return;
+
+    if (REDUCED || !('IntersectionObserver' in window)) {
+      blocks.forEach(function (el) {
+        el.classList.add('is-visible');
+      });
+      return;
+    }
+
+    var io = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    blocks.forEach(function (el) {
       io.observe(el);
     });
   }
@@ -131,6 +157,7 @@
 
   function boot() {
     initStats();
+    initReveal();
     initMenu();
     initVideo();
   }
