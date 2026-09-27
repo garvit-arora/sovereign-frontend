@@ -35,7 +35,13 @@ export function CloudDashboard() {
   useEffect(() => {
     let active = true
     let timer: ReturnType<typeof setTimeout>
-    const poll = async () => { await refresh(); if (active) timer = setTimeout(poll, 3000) }
+    let polling = false
+    const poll = async () => {
+      if (!active || polling) return
+      polling = true
+      try { await refresh() } finally { polling = false }
+      if (active) timer = setTimeout(poll, 3000)
+    }
     void poll()
     return () => { active = false; clearTimeout(timer) }
   }, [refresh])

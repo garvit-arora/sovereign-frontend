@@ -29,11 +29,20 @@ export async function request<T>(path: string, method = 'GET', body?: unknown): 
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
   }
-  const response = await fetch(path, {
-    method, credentials: 'same-origin', signal: AbortSignal.timeout(20000),
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-  })
+  let response: Response
+  try {
+    response = await fetch(path, {
+      method, credentials: 'same-origin', signal: AbortSignal.timeout(45000),
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    })
+  } catch (error) {
+    const timedOut = error instanceof DOMException && error.name === 'TimeoutError'
+    throw new WorkspaceError(
+      timedOut ? 'The server took too long to respond. Render may be waking up — try again in a moment.' : (error as Error).message,
+      timedOut ? 504 : 0,
+    )
+  }
   const data = await response.json().catch(() => null)
   if (!response.ok) {
     const detail = data?.detail
