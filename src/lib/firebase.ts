@@ -18,12 +18,17 @@ export function watchAuth(onUser: (user: User | null) => void) {
   return onAuthStateChanged(auth, onUser)
 }
 
-export async function getIdToken(): Promise<string | null> {
+export async function waitForUser() {
+  await auth.authStateReady()
+  return auth.currentUser
+}
+
+export async function getIdToken(forceRefresh = false): Promise<string | null> {
   await auth.authStateReady()
   const user = auth.currentUser
   if (!user) return null
   try {
-    return await user.getIdToken()
+    return await user.getIdToken(forceRefresh)
   } catch {
     return null
   }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CloudDashboard } from '@/components/CloudDashboard'
-import { watchAuth } from '@/lib/firebase'
+import { waitForUser } from '@/lib/firebase'
 import '@/workspace.css'
 
 export default function App() {
@@ -8,7 +8,9 @@ export default function App() {
   const [signedIn, setSignedIn] = useState(false)
 
   useEffect(() => {
-    return watchAuth((user) => {
+    let active = true
+    void waitForUser().then((user) => {
+      if (!active) return
       if (!user) {
         const next = `${window.location.pathname}${window.location.search}`
         window.location.replace(`/login?next=${encodeURIComponent(next || '/app')}`)
@@ -17,6 +19,7 @@ export default function App() {
       setSignedIn(true)
       setReady(true)
     })
+    return () => { active = false }
   }, [])
 
   if (!ready || !signedIn) {

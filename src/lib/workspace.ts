@@ -22,9 +22,13 @@ export class WorkspaceError extends Error {
 import { getIdToken } from '@/lib/firebase'
 
 export async function request<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
-  const token = await getIdToken()
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (token) headers.Authorization = `Bearer ${token}`
+  let token = await getIdToken()
+  if (!token) token = await getIdToken(true)
+  if (!token) throw new WorkspaceError('Sign in to continue.', 401)
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  }
   const response = await fetch(path, {
     method, credentials: 'same-origin', signal: AbortSignal.timeout(20000),
     headers,

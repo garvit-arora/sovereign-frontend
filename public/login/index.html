@@ -692,8 +692,8 @@
     }
   </style>
 
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script>
     (function () {
       'use strict';
@@ -911,11 +911,20 @@
         }
       }
 
-      function onAuthSuccess() {
+      function onAuthSuccess(credential) {
         showError('');
-        var next = new URLSearchParams(window.location.search).get('next') || '/app';
-        if (!next.startsWith('/') || next.startsWith('//')) next = '/';
-        window.location.href = next;
+        var user = credential && credential.user ? credential.user : auth.currentUser;
+        if (!user) {
+          showError('Sign-in succeeded but no session was created. Please try again.');
+          return;
+        }
+        return user.getIdToken().then(function () {
+          var next = new URLSearchParams(window.location.search).get('next') || '/app';
+          if (!next.startsWith('/') || next.startsWith('//')) next = '/';
+          window.location.href = next;
+        }).catch(function () {
+          showError('Could not finish sign-in. Please try again.');
+        });
       }
 
       function signInEmail() {
