@@ -19,12 +19,17 @@ export function watchAuth(onUser: (user: User | null) => void) {
 }
 
 export async function getIdToken(): Promise<string | null> {
+  await auth.authStateReady()
   const user = auth.currentUser
   if (!user) return null
-  return user.getIdToken()
+  try {
+    return await user.getIdToken()
+  } catch {
+    return null
+  }
 }
 
-export async function logout() {
+export async function logout(redirectTo = '/') {
   await signOut(auth)
-  window.location.href = '/'
+  window.location.href = redirectTo
 }

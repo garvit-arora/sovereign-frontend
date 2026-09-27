@@ -1080,10 +1080,6 @@
         else if (mq.addListener) mq.addListener(setMode);
       });
 
-      auth.onAuthStateChanged(function (user) {
-        if (user) onAuthSuccess();
-      });
-
       setMode();
       window.addEventListener('load', runEntrance);
     })();
