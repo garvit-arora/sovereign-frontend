@@ -1,20 +1,25 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
-import { ArrowDownToLine, ArrowRight, Check, CheckCheck, ChevronRight, CircleHelp, Clock3, Cpu, FileCode2, FolderOpen, LayoutDashboard, ListTodo, Loader2, LogOut, Menu, Monitor, MoreHorizontal, Plus, Search, Server, Settings2, Terminal, Unplug, Upload, X } from 'lucide-react'
+import type { User } from 'firebase/auth'
+import { ArrowDownToLine, ArrowRight, Check, CheckCheck, ChevronRight, CircleHelp, Clock3, Cpu, FileCode2, FolderOpen, LayoutDashboard, ListTodo, Loader2, Menu, Monitor, MoreHorizontal, Plus, Search, Server, Settings2, Terminal, Unplug, Upload, UserRound, X } from 'lucide-react'
 import { logout } from '@/lib/firebase'
+import { pathForView, viewFromPath, type AppView } from '@/lib/routes'
+import { userDisplayName, userInitials } from '@/lib/user'
 import { request, SAMPLE, WorkspaceError, type Job, type Machine, type Workspace } from '@/lib/workspace'
+import { AccountPage } from './AccountPage'
 import { AlgorithmOptions } from './AlgorithmOptions'
 import { ResultSummary } from './ResultSummary'
+import { UserAvatar } from './UserAvatar'
 import { DEFAULT_ALGORITHMS } from '@/lib/algorithms'
 
-type View = 'overview' | 'jobs' | 'machines' | 'settings'
+type View = AppView
 const NAV = [{ id: 'overview', label: 'Overview', icon: LayoutDashboard }, { id: 'jobs', label: 'My jobs', icon: ListTodo }, { id: 'machines', label: 'Machines', icon: Monitor }] as const
 const terminal = (state: string) => ['COMPLETED', 'FAILED', 'CANCELLED'].includes(state)
 const nice = (text: string) => text.toLowerCase().replaceAll('_', ' ').replace(/^./, x => x.toUpperCase())
 const when = (seconds: number) => new Date(seconds * 1000).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 const formatNumber = (n?: number | null) => n == null ? '—' : Number(n.toPrecision(8)).toLocaleString()
 
-export function CloudDashboard() {
-  const [view, setView] = useState<View>('overview')
+export function CloudDashboard({ user }: { user: User }) {
+  const [view, setView] = useState<View>(() => viewFromPath())
   const [data, setData] = useState<Workspace>({ workers: [], jobs: [] })
   const [ready, setReady] = useState(false), [error, setError] = useState('')
   const [search, setSearch] = useState(''), [filter, setFilter] = useState('all'), [mobile, setMobile] = useState(false)
@@ -46,6 +51,11 @@ export function CloudDashboard() {
     return () => { active = false; clearTimeout(timer) }
   }, [refresh])
   useEffect(() => {
+    const onPopState = () => setView(viewFromPath())
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+  useEffect(() => {
     const key = (e: KeyboardEvent) => { if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); searchRef.current?.focus() } }
     window.addEventListener('keydown', key)
     return () => window.removeEventListener('keydown', key)
@@ -67,23 +77,28 @@ export function CloudDashboard() {
   const completed = data.jobs.filter(j => j.state === 'COMPLETED')
   const queued = data.jobs.filter(j => j.state === 'QUEUED')
   const jobs = data.jobs.filter(j => j.name.toLowerCase().includes(search.toLowerCase()) && (filter === 'all' || j.state === filter))
-  const go = (next: View) => { setView(next); setMobile(false) }
+  const go = (next: View) => {
+    setView(next)
+    setMobile(false)
+    const path = pathForView(next)
+    if (window.location.pathname !== path) window.history.pushState(null, '', path)
+  }
   return <div className="workspace">
     {mobile && <button className="nav-scrim" aria-label="Close navigation" onClick={() => setMobile(false)} />}
     <aside className={`workspace-nav ${mobile ? 'is-open' : ''}`}>
       <a className="wordmark" href="/">Sovereign<span>.</span></a>
-      <div className="workspace-label"><span className="workspace-avatar">S</span><span>My workspace<small>Optimization workspace</small></span></div>
+      <div className="workspace-label"><UserAvatar user={user} className="workspace-avatar" /><span>{userDisplayName(user)}<small>Optimization workspace</small></span></div>
       <nav aria-label="Main navigation">{NAV.map(item => <button key={item.id} onClick={() => go(item.id)} className={view === item.id ? 'active' : ''} aria-current={view === item.id ? 'page' : undefined}><item.icon size={17} />{item.label}{item.id === 'jobs' && data.jobs.length > 0 && <span className="nav-count">{data.jobs.length}</span>}</button>)}</nav>
       <div className="sidebar-section"><div className="sidebar-heading">Your machines<button className="icon-button" aria-label="Connect a machine" onClick={() => setDialog('machine')}><Plus size={16} /></button></div>
         {data.workers.length ? data.workers.slice(0, 5).map(w => <button className="sidebar-machine" key={w.id} onClick={() => go('machines')}><span className={`square-dot ${w.online ? 'green' : ''}`} />{w.name}</button>) : <p className="sidebar-empty">Connect your first machine<br />to start computing.</p>}
       </div>
-      <div className="nav-bottom"><button onClick={() => go('settings')}><Settings2 size={17} />Settings</button><button onClick={() => setDialog('help')}><CircleHelp size={17} />Getting started<ArrowRight size={14} /></button></div>
+      <div className="nav-bottom"><button onClick={() => go('account')} className={view === 'account' ? 'active' : ''}><UserRound size={17} />Account</button><button onClick={() => go('settings')} className={view === 'settings' ? 'active' : ''}><Settings2 size={17} />Settings</button><button onClick={() => setDialog('help')}><CircleHelp size={17} />Getting started<ArrowRight size={14} /></button></div>
     </aside>
     <div className="workspace-body">
-      <header className="workspace-topbar"><button className="icon-button mobile-toggle" aria-label="Open navigation" onClick={() => setMobile(true)}><Menu size={20} /></button><div className="search-box"><Search size={17} /><input ref={searchRef} aria-label="Search jobs" placeholder="Search your jobs…" value={search} onChange={e => { setSearch(e.target.value); setView('jobs') }} /><kbd>Ctrl K</kbd></div><button className="primary-button" onClick={() => setDialog('job')}><Plus size={16} />New job</button><span className="topbar-divider" /><span className="profile-avatar" title="Your workspace">S</span></header>
+      <header className="workspace-topbar"><button className="icon-button mobile-toggle" aria-label="Open navigation" onClick={() => setMobile(true)}><Menu size={20} /></button><div className="search-box"><Search size={17} /><input ref={searchRef} aria-label="Search jobs" placeholder="Search your jobs…" value={search} onChange={e => { setSearch(e.target.value); go('jobs') }} /><kbd>Ctrl K</kbd></div><button className="primary-button" onClick={() => setDialog('job')}><Plus size={16} />New job</button><span className="topbar-divider" /><button type="button" className="profile-avatar profile-avatar-button" title="Open account" aria-label="Open account" onClick={() => go('account')}>{userInitials(user)}</button></header>
       <main>
         {error && <div role="alert" className="error-banner">{error}<button onClick={() => void refresh()}>Retry</button></div>}
-        <div className="page-heading"><div><p className="eyebrow">{view === 'overview' ? new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }) : 'My workspace'}</p><h1>{view === 'overview' ? 'Your work, in focus.' : view === 'jobs' ? 'My jobs' : view === 'machines' ? 'Your machines' : 'Workspace settings'}</h1><p className="page-description">{view === 'overview' ? 'A little less waiting. A little more solving.' : view === 'jobs' ? 'Submit a problem. Follow its progress. Keep the result.' : view === 'machines' ? 'Compute on the hardware you already have.' : 'Your connection and workspace access.'}</p></div>{view === 'overview' || view === 'machines' ? <button className="secondary-button" onClick={() => setDialog('machine')}><Plus size={15} />Connect machine</button> : null}</div>
+        <div className="page-heading"><div><p className="eyebrow">{view === 'overview' ? new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }) : view === 'account' ? 'Signed in' : 'My workspace'}</p><h1>{view === 'overview' ? 'Your work, in focus.' : view === 'jobs' ? 'My jobs' : view === 'machines' ? 'Your machines' : view === 'account' ? 'Your account' : 'Workspace settings'}</h1><p className="page-description">{view === 'overview' ? 'A little less waiting. A little more solving.' : view === 'jobs' ? 'Submit a problem. Follow its progress. Keep the result.' : view === 'machines' ? 'Compute on the hardware you already have.' : view === 'account' ? 'Profile details, sign-in method, and workspace summary.' : 'Connector setup and workspace preferences.'}</p></div>{view === 'overview' || view === 'machines' ? <button className="secondary-button" onClick={() => setDialog('machine')}><Plus size={15} />Connect machine</button> : null}</div>
         {(view === 'overview' || view === 'jobs') && <>
           <div className="summary-strip"><span><Monitor size={16} /><strong>{ready ? online.length : '—'}</strong>Machines online</span><span><CheckCheck size={17} /><strong>{ready ? completed.length : '—'}</strong>Completed</span><span><Clock3 size={16} /><strong>{ready ? running.length + queued.length : '—'}</strong>In progress</span></div>
           <section className="surface jobs-surface"><div className="surface-heading"><h2><ListTodo size={18} />{view === 'overview' ? 'Recent jobs' : 'All jobs'}</h2><select aria-label="Filter jobs by status" value={filter} onChange={e => setFilter(e.target.value)}><option value="all">All statuses</option><option value="QUEUED">Queued</option><option value="SOLVING">Running</option><option value="COMPLETED">Completed</option><option value="FAILED">Failed</option><option value="CANCELLED">Cancelled</option></select>{view === 'overview' && <button className="quiet-button push-right" onClick={() => go('jobs')}>View all<ChevronRight size={14} /></button>}</div>
@@ -94,7 +109,8 @@ export function CloudDashboard() {
         </>}
         {view === 'overview' && <div className="overview-grid"><section className="surface"><div className="surface-heading"><h2><Monitor size={18} />Connected machines</h2><button className="icon-button push-right" aria-label="View machines" onClick={() => go('machines')}><MoreHorizontal size={20} /></button></div>{data.workers.length ? <div className="machine-list">{data.workers.slice(0, 3).map(w => <MachineRow key={w.id} machine={w} />)}</div> : <div className="machine-onboarding"><div className="machine-illustration"><Monitor size={34} strokeWidth={1.2} /><span className="connection-line" /><Server size={28} strokeWidth={1.2} /></div><h3>Your hardware. Your compute.</h3><p>Connect a laptop or company server.<br />Jobs travel securely to it and results come back here.</p><button className="secondary-button" onClick={() => setDialog('machine')}><Plus size={15} />Connect a machine</button></div>}</section><section className="surface"><div className="surface-heading"><h2><Clock3 size={18} />{data.jobs.length ? 'Latest activity' : 'A simple place to start'}</h2></div><div className="activity-list">{data.jobs.length ? data.jobs.slice(0, 4).map(j => <button className="activity-item" key={j.id} onClick={() => void openJob(j.id)}><span className={`activity-dot ${j.state === 'COMPLETED' ? 'green' : 'purple'}`} /><span><strong>{j.name}</strong><small>{nice(j.state)} · {when(j.updated)}</small></span><ChevronRight size={14} /></button>) : <><StartStep number="1" title="Connect your machine" text="Run the worker on the laptop or server you want to use." done={online.length > 0} onClick={() => setDialog('machine')} /><StartStep number="2" title="Add an optimization problem" text="Upload a JSON or MPS model, or try our small example." onClick={() => setDialog('job')} /><StartStep number="3" title="Get your result" text="See the solution, verification, and compute used in one place." onClick={() => setDialog('help')} /></>}</div></section></div>}
         {view === 'machines' && <section className="surface"><div className="surface-heading"><h2><Monitor size={18} />All machines<span className="count-pill">{data.workers.length}</span></h2></div>{data.workers.length ? data.workers.map(w => <div className="machine-management" key={w.id}><MachineRow machine={w} /><button className="quiet-button danger-text" onClick={async () => { if (!window.confirm(`Disconnect ${w.name}? Its worker key will be revoked.`)) return; try { await request(`/api/workers/${w.id}`, 'DELETE'); await refresh() } catch (e) { setError((e as Error).message) } }}><Unplug size={15} />Disconnect</button></div>) : <div className="empty-jobs"><Monitor size={32} strokeWidth={1.4} /><h3>No machines connected yet</h3><p>Keep this website online. Run the worker where your hardware is.</p><button className="primary-button" onClick={() => setDialog('machine')}><Plus size={15} />Connect machine</button></div>}</section>}
-        {view === 'settings' && <section className="surface settings-surface"><div className="surface-heading"><h2><Settings2 size={18} />Account</h2></div><div className="settings-content"><label>Website address<input readOnly value={window.location.origin} /></label><p>Use this address when running <code>sovereign connect</code> on your machine.</p><button className="secondary-button" onClick={() => setDialog('help')}>Getting started<ArrowRight size={15} /></button><hr /><h3>Sign out</h3><p>Signing out ends your session on this browser. Your jobs and connected machines stay saved to your account.</p><button className="secondary-button" onClick={() => void logout()}><LogOut size={15} />Sign out</button></div></section>}
+        {view === 'account' && <AccountPage user={user} data={data} ready={ready} onOpenSettings={() => go('settings')} />}
+        {view === 'settings' && <section className="surface settings-surface"><div className="surface-heading"><h2><Settings2 size={18} />Workspace</h2></div><div className="settings-content"><label>Website address<input readOnly value={window.location.origin} /></label><p>Use this address when running <code>sovereign connect</code> on your machine.</p><label>Coordinator URL<input readOnly value="https://sovereign-we6b.onrender.com" /></label><p>The backend that routes jobs between this website and your connected machines.</p><button className="secondary-button" onClick={() => setDialog('help')}>Getting started<ArrowRight size={15} /></button><button className="secondary-button" onClick={() => go('account')}>Open account page<ArrowRight size={15} /></button></div></section>}
         <footer className="workspace-footer"><span className={`connection-dot ${ready && !error ? 'green' : ''}`} />{ready && !error ? 'Workspace connected' : 'Connecting to workspace'}<span className="footer-right">Sovereign · Your compute, connected.</span></footer>
       </main>
     </div>
