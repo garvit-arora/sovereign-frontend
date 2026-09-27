@@ -7,6 +7,18 @@
     {
       "source": "/api/:path*",
       "destination": "https://sovereign-we6b.onrender.com/api/:path*"
+    },
+    {
+      "source": "/app",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/",
+      "destination": "/landing/index.html"
     }
   ]
 }

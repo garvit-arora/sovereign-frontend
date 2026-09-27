@@ -19,10 +19,15 @@ export class WorkspaceError extends Error {
   status: number
   constructor(message: string, status: number) { super(message); this.status = status }
 }
+import { getIdToken } from '@/lib/firebase'
+
 export async function request<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
+  const token = await getIdToken()
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (token) headers.Authorization = `Bearer ${token}`
   const response = await fetch(path, {
     method, credentials: 'same-origin', signal: AbortSignal.timeout(20000),
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: body === undefined ? undefined : JSON.stringify(body),
   })
   const data = await response.json().catch(() => null)
