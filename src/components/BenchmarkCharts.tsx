@@ -111,7 +111,12 @@ export function ScalingChart({ rows }: { rows: BenchRow[] }) {
     const key = `${r.suite}|${r.profile}`
     series.set(key, [...(series.get(key) ?? []), r])
   }
-  const highsLines = [...SWEEP_SUITES].map(suite => references.filter(r => r.suite === suite).sort((a, b) => a.shape.nonzeros! - b.shape.nonzeros!))
+  const highsGroups = new Map<string, BenchRow[]>()
+  for (const r of references.filter(ref => SWEEP_SUITES.has(ref.suite))) {
+    const key = `${r.suite}|${r.kind}`
+    highsGroups.set(key, [...(highsGroups.get(key) ?? []), r])
+  }
+  const highsLines = [...highsGroups.values()].map(line => [...line].sort((a, b) => a.shape.nonzeros! - b.shape.nonzeros!))
   return <figure className="chart">
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Solve time against number of nonzeros, logarithmic axes">
       <Axes x={x} y={y} xr={xr} yr={yr} xLabel="Model size: constraint nonzeros (log scale)" yLabel="Solve time (log scale)" xTick={count} />
