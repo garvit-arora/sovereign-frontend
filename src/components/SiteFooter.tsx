@@ -39,7 +39,7 @@ export function SiteFooter() {
                 <p className="mt-2 font-mono text-[11.5px] text-white/80">{engine.version}</p>
                 <p className="mt-1 font-mono text-[10.5px] text-white/40">{engine.path}</p>
                 <p className="mt-2 text-[11px] text-white/50">
-                  CUDA backend: {engine.cuda ? 'compiled in' : 'not compiled'}
+                  CUDA: {engine.cuda ? 'GPU available' : 'no usable GPU'}
                 </p>
               </>
             ) : (

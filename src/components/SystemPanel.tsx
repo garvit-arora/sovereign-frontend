@@ -8,7 +8,7 @@ import { Card } from '@/components/ui'
  * System panel: what is actually running, and what is not.
  *
  * Deliberately reports the absent things as clearly as the present ones. A
- * dashboard that quietly omits "CUDA: not compiled" invites the reader to
+ * dashboard that quietly omits "CUDA: no usable GPU" invites the reader to
  * assume it exists.
  */
 
@@ -67,7 +67,7 @@ export function SystemPanel() {
           <Row label="Hardware threads" value={String(system?.hardware_threads ?? '-')} />
           <Row label="Solve workers" value={String(system?.worker_threads ?? '-')} />
           <Row label="Device" value={system?.device ?? '-'} />
-          <Row label="CUDA" value={system?.cuda_available ? 'available' : 'not compiled'} />
+          <Row label="CUDA" value={system?.cuda_available ? 'available' : 'no usable GPU'} />
         </Block>
 
         <Block icon={Package} title="Capabilities">

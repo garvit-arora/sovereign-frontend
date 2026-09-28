@@ -28,7 +28,8 @@ export function ResultSummary({ job }: { job: Job }) {
     : 'The result has no passing verification report; do not treat it as a verified solution.')
 
   if (result.gpu_used && (result.gpu_operations ?? 0) > 0) {
-    lines.push(`CUDA executed ${result.gpu_operations} sparse matrix operations; other solver steps may have run on CPU.`)
+    const factorizations = result.gpu_factorizations ?? 0
+    lines.push(`CUDA executed ${result.gpu_operations} GPU operations${factorizations ? `, including ${factorizations} dense factorizations` : ''}; other solver steps ran on CPU.`)
   } else if (job.device === 'cuda') {
     lines.push('CUDA was requested, but this result recorded no GPU kernel execution.')
   } else {

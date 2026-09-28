@@ -106,11 +106,9 @@ export function EngineDashboard() {
     {
       label: 'GPU',
       value: cuda ? 'Available' : 'Not in use',
-      // Being explicit here matters: the spec forbids advertising GPU support
-      // that does not exist, and no CUDA kernels have been written.
       hint: cuda
-        ? 'A CUDA device was detected.'
-        : 'No CUDA kernels exist. CPU performs all work. See ROADMAP M11.',
+        ? 'Interior-point factorizations can run on the CUDA GPU.'
+        : 'No usable NVIDIA GPU was detected. The CPU performs all work.',
       icon: Gauge,
       tone: cuda ? 'ok' : 'off',
     },

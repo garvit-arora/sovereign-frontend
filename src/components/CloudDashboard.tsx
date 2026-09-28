@@ -62,6 +62,16 @@ function hardwareSummary(w: Machine) {
   const parts = [w.capabilities.gpu_name, w.capabilities.cpu_threads ? `${w.capabilities.cpu_threads} CPU threads` : null]
   return parts.filter(Boolean).join(' · ') || 'Waiting for first connection'
 }
+function GpuTag({ caps }: { caps: Machine['capabilities'] }) {
+  if (caps.cuda_available) {
+    const detail = [caps.gpu_memory_mb ? `${caps.gpu_memory_mb} MB` : null,
+      caps.gpu_compute_capability ? `compute ${caps.gpu_compute_capability}` : null,
+      caps.cuda_driver_version ? `CUDA ${caps.cuda_driver_version} driver` : null].filter(Boolean).join(' · ')
+    return <span className="tag" title={detail || undefined}>CUDA</span>
+  }
+  if (!caps.gpu_name) return null
+  return <span className="tag warn" title={caps.cuda_reason || 'This machine\u2019s engine cannot use its GPU. Update the connector.'}>GPU not usable</span>
+}
 
 type ConfirmState = {
   title: string
@@ -360,7 +370,7 @@ export function CloudDashboard({ user }: { user: User }) {
                   <tr key={w.id}>
                     <td><div className="machine-name"><MachineIcon machine={w} /><span><strong>{w.name}</strong><small>{[w.capabilities.hostname, w.capabilities.platform].filter(Boolean).join(' · ') || '—'}</small></span></div></td>
                     <td><MachineState machine={w} /></td>
-                    <td className="muted hide-sm"><span className="hardware">{hardwareSummary(w)}{w.capabilities.cuda_available && <span className="tag">CUDA</span>}</span></td>
+                    <td className="muted hide-sm"><span className="hardware">{hardwareSummary(w)}<GpuTag caps={w.capabilities} /></span></td>
                     <td className="muted mono hide-sm">{w.capabilities.engine_version ? `v${w.capabilities.engine_version}` : '—'}</td>
                     <td className="muted nowrap">{w.seen ? ago(w.seen) : 'Never'}</td>
                     <td className="row-action"><button className="quiet-button danger-text" onClick={() => askDisconnect(w)}><Unplug size={14} />Disconnect</button></td>
@@ -486,7 +496,7 @@ function MachineRow({ machine: w }: { machine: Machine }) {
     <MachineIcon machine={w} />
     <div className="machine-text">
       <strong>{w.name}</strong>
-      <small>{hardwareSummary(w)}{w.capabilities.cuda_available && <span className="tag">CUDA</span>}</small>
+      <small>{hardwareSummary(w)}<GpuTag caps={w.capabilities} /></small>
     </div>
     <MachineState machine={w} />
   </div>
@@ -567,7 +577,7 @@ function NewJob({ machines, onClose, onCreated }: { machines: Machine[]; onClose
   </WorkspaceModal>
 }
 function ConnectMachine({ onClose, onPaired }: { onClose: () => void; onPaired: () => Promise<void> }) {
-  const [pending, setPending] = useState<Array<{ code: string; name: string; expiresInSeconds: number; capabilities: { cuda_available?: boolean; hostname?: string } }>>([])
+  const [pending, setPending] = useState<Array<{ code: string; name: string; expiresInSeconds: number; capabilities: { cuda_available?: boolean; hostname?: string; gpu_name?: string } }>>([])
   const [manualCode, setManualCode] = useState(''), [duration, setDuration] = useState(8), [error, setError] = useState(''), [busy, setBusy] = useState(false)
   const server = 'https://sovereign-we6b.onrender.com'
   const install = CONNECTOR_INSTALL
@@ -595,7 +605,7 @@ function ConnectMachine({ onClose, onPaired }: { onClose: () => void; onPaired: 
         {pending.length
           ? pending.map(item => (
             <div className="token-box" key={item.code}>
-              <div><strong>{item.name}</strong><small>{item.capabilities.hostname || 'Waiting machine'} · {item.capabilities.cuda_available ? 'CUDA ready' : 'CPU only'} · expires in {Math.max(1, Math.round(item.expiresInSeconds / 60))} min</small></div>
+              <div><strong>{item.name}</strong><small>{item.capabilities.hostname || 'Waiting machine'} · {item.capabilities.cuda_available ? `CUDA ready${item.capabilities.gpu_name ? ` (${item.capabilities.gpu_name})` : ''}` : item.capabilities.gpu_name ? `${item.capabilities.gpu_name}, CUDA unavailable` : 'CPU only'} · expires in {Math.max(1, Math.round(item.expiresInSeconds / 60))} min</small></div>
               <code>{item.code}</code>
               <button className="primary-button" disabled={busy} onClick={() => void approve(item.code)}><Check size={14} />Approve</button>
             </div>

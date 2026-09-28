@@ -2,6 +2,7 @@ export type Machine = {
   id: string; name: string; online: boolean; seen: number
   capabilities: {
     hostname?: string; platform?: string; cpu_threads?: number; cuda_available?: boolean; gpu_name?: string; engine_version?: string
+    cuda_reason?: string; cuda_driver_version?: string; gpu_compute_capability?: string; gpu_memory_mb?: number
     reference_solvers?: string[]; highs_version?: string
   }
 }
@@ -13,7 +14,7 @@ export type Job = {
   result?: {
     status: string; objective_value?: number | null; runtime_seconds?: number; optimality_gap?: number
     primal?: Record<string, number>; message?: string; warnings?: string[]
-    gpu_used?: boolean; gpu_operations?: number; requested_device?: string
+    gpu_used?: boolean; gpu_operations?: number; gpu_factorizations?: number; requested_device?: string
     verification?: { is_valid: boolean; issues: string[] }
   }
 }

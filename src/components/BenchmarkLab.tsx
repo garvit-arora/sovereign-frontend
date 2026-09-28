@@ -237,8 +237,8 @@ export function BenchmarkLab({ machines }: { machines: Machine[] }) {
           <p>Sovereign jobs run on any machine. HiGHS reference jobs only go to a machine running the Python worker with <code>highspy</code> installed; until one connects they stay queued.</p>
           <pre className="bench-command">{`pip install highspy\ncurl -o sovereign-worker.py ${COORDINATOR}/worker.py\npython sovereign-worker.py --server ${COORDINATOR} --engine <path to sovereign.exe> --pair`}</pre>
         </div>}
-        {device === 'cuda' && online.length > 0 && !online.some(m => m.capabilities.cuda_available && (!target || m.id === target)) && <p className="info-note">No CUDA-ready machine is online. GPU jobs will wait in the queue; simplex and Frank-Wolfe jobs still run on the CPU.</p>}
-        {device !== 'cpu' && <p className="info-note">CUDA currently accelerates sparse matrix products inside interior-point solves. Simplex and Frank-Wolfe always run on the CPU. Each result reports how many GPU operations it actually executed.</p>}
+        {device === 'cuda' && online.length > 0 && !online.some(m => m.capabilities.cuda_available && (!target || m.id === target)) && <p className="info-note">No CUDA-ready machine is online. GPU jobs will wait in the queue; simplex, Frank-Wolfe and branch-and-bound jobs still run on the CPU.</p>}
+        {device !== 'cpu' && <p className="info-note">CUDA runs the dense factorization inside LP and QP interior point, the main cost of each iteration. Automatic routing uses the GPU once that system reaches 400 rows. Simplex, Frank-Wolfe and branch-and-bound always run on the CPU. Each result reports how many GPU operations it actually executed.</p>}
         <div className="bench-setup-footer">
           <span className="muted">{plannedJobs} jobs{reference ? ', including one HiGHS reference per model' : ''}</span>
           <button className="primary-button" disabled={busy || !plannedJobs} onClick={() => void start()}>{busy ? <Loader2 size={15} className="spin" /> : <Play size={15} />}Start run</button>

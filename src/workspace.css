@@ -575,6 +575,7 @@
   letter-spacing: 0.03em;
   line-height: 18px;
 }
+.tag.warn { border-color: var(--ws-amber-soft); background: var(--ws-amber-soft); color: var(--ws-amber); cursor: help; }
 
 .activity-list { padding: 4px 18px; }
 .activity-item,

@@ -87,7 +87,7 @@ export type SubmitJob = {
   modelPath?: string
   algorithm?: string | null
   threads?: number
-  /** Requested compute device. 'cuda' is accepted but not implemented. */
+  /** Requested compute device. 'cuda' runs interior-point factorizations on an NVIDIA GPU. */
   device?: 'cpu' | 'cuda'
   timeLimitSeconds?: number
   mipGap?: number
