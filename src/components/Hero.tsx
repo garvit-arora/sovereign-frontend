@@ -69,7 +69,7 @@ export function Hero() {
 
           <p className="mt-6 max-w-xl font-sans text-[14px] md:text-[15px] leading-relaxed text-slate-500">
             Sovereign is an independent LP, MILP and QP solver written from mathematical
-            foundations — revised simplex, Mehrotra interior point and branch-and-cut — with
+            foundations — dual simplex, Mehrotra interior point and branch-and-cut — with
             every returned solution independently re-verified before it is called optimal.
           </p>
 

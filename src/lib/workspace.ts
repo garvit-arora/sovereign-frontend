@@ -1,6 +1,9 @@
 export type Machine = {
   id: string; name: string; online: boolean; seen: number
-  capabilities: { hostname?: string; platform?: string; cpu_threads?: number; cuda_available?: boolean; gpu_name?: string; engine_version?: string }
+  capabilities: {
+    hostname?: string; platform?: string; cpu_threads?: number; cuda_available?: boolean; gpu_name?: string; engine_version?: string
+    reference_solvers?: string[]; highs_version?: string
+  }
 }
 export type Job = {
   id: string; name: string; state: string; created: number; updated: number

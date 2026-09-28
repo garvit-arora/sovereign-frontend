@@ -24,7 +24,7 @@ export type MarqueeItem = {
  * hover treatment are identical either way.
  */
 export const MARQUEE_ITEMS: MarqueeItem[] = [
-  { name: 'LP', caption: 'revised simplex', gradient: { from: '#3b82f6', to: '#1d4ed8' } },
+  { name: 'LP', caption: 'dual simplex', gradient: { from: '#3b82f6', to: '#1d4ed8' } },
   { name: 'MILP', caption: 'branch-and-cut', gradient: { from: '#8b5cf6', to: '#6d28d9' } },
   { name: 'QP', caption: 'Mehrotra IPM', gradient: { from: '#0ea5e9', to: '#0369a1' } },
   { name: 'Netlib', caption: 'LP suite', gradient: { from: '#10b981', to: '#047857' } },

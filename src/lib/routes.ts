@@ -1,8 +1,9 @@
-export type AppView = 'overview' | 'jobs' | 'machines' | 'account'
+export type AppView = 'overview' | 'jobs' | 'benchmarks' | 'machines' | 'account'
 
 const PATH_TO_VIEW: Record<string, AppView> = {
   '/app': 'overview',
   '/app/jobs': 'jobs',
+  '/app/benchmarks': 'benchmarks',
   '/app/machines': 'machines',
   '/app/account': 'account',
 }

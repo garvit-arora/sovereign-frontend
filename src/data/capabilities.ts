@@ -21,12 +21,12 @@ export const CAPABILITIES: Capability[] = [
       {
         name: 'Linear Programming',
         level: 'ready',
-        note: 'Revised simplex with product-form updates; matches reference objectives on Netlib AFIRO and the scale suite.',
+        note: 'Bounded dual simplex with steepest-edge pricing on a sparse LU, primal revised simplex as fallback; matches HiGHS on Netlib AFIRO, MIPLIB relaxations and transport LPs up to 40,000 variables.',
       },
       {
         name: 'Mixed Integer LP',
         level: 'beta',
-        note: 'Branch-and-cut with strong branching and parallel child LPs. Correct on small instances; official MIPLIB sets still exceed the time limit.',
+        note: 'Branch-and-cut with reliability branching, warm-started node LPs, plunging, diving and validated cuts. Proves MIPLIB flugpl and gt2 optimal; harder instances return a verified incumbent at the time limit.',
       },
       {
         name: 'Convex QP',
@@ -61,8 +61,8 @@ export const CAPABILITIES: Capability[] = [
       },
       {
         name: 'Basis factorization',
-        level: 'limited',
-        note: 'Dense LU with partial pivoting. Correct, but memory and time are O(m^2)/O(m^3) in the number of rows, which caps realistic model size.',
+        level: 'ready',
+        note: 'Sparse LU (left-looking, threshold partial pivoting, sparsest-column order) with sparse product-form updates between refactorizations.',
       },
     ],
   },
@@ -76,8 +76,8 @@ export const CAPABILITIES: Capability[] = [
       },
       {
         name: 'Warm-started node LPs',
-        level: 'planned',
-        note: 'Each node re-solves from a cold logical basis instead of inheriting the parent basis. This is the single biggest known MILP cost.',
+        level: 'ready',
+        note: 'Each node re-solves with the dual simplex from its parent\'s optimal basis; new cut rows start with their slack basic.',
       },
       {
         name: 'CUDA backend',
@@ -91,8 +91,8 @@ export const CAPABILITIES: Capability[] = [
 export const PIPELINE = [
   { stage: 'Model / MPS', detail: 'JSON and linear MPS, validated before solving' },
   { stage: 'Presolve', detail: 'Reductions with solution reconstruction' },
-  { stage: 'LP relaxation', detail: 'Revised simplex / Mehrotra IPM' },
-  { stage: 'Branch-and-cut', detail: 'Strong branching, cuts, heuristics' },
+  { stage: 'LP relaxation', detail: 'Dual simplex / Mehrotra IPM' },
+  { stage: 'Branch-and-cut', detail: 'Reliability branching, cuts, diving' },
   { stage: 'Parallel CPU', detail: 'Child LP concurrency only' },
   { stage: 'Verified solution', detail: 'Independent feasibility re-check' },
 ]

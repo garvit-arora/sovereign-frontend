@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNod
 import type { User } from 'firebase/auth'
 import {
   Activity, ArrowDownToLine, ArrowRight, BookOpen, Check, ChevronRight, CircleAlert, CircleCheck, CircleSlash, CircleX,
-  Clock3, Copy, Cpu, FileCode2, Inbox, LayoutGrid, ListChecks, Loader2, Menu, Monitor, Plus, Search, Server, ShieldCheck,
+  Clock3, Copy, Cpu, FileCode2, Gauge, Inbox, LayoutGrid, ListChecks, Loader2, Menu, Monitor, Plus, Search, Server, ShieldCheck,
   Terminal, Trash2, Unplug, Upload, type LucideIcon,
 } from 'lucide-react'
 import { EXAMPLES } from '@/lib/examples'
@@ -12,6 +12,7 @@ import { userDisplayName } from '@/lib/user'
 import { request, WorkspaceError, type Job, type Machine, type Workspace } from '@/lib/workspace'
 import { AccountPage } from './AccountPage'
 import { AlgorithmOptions } from './AlgorithmOptions'
+import { BenchmarkLab } from './BenchmarkLab'
 import { ResultSummary } from './ResultSummary'
 import { SovereignMark } from './SovereignMark'
 import { UserAvatar } from './UserAvatar'
@@ -22,11 +23,13 @@ type View = AppView
 const NAV = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
   { id: 'jobs', label: 'Jobs', icon: ListChecks },
+  { id: 'benchmarks', label: 'Benchmarks', icon: Gauge },
   { id: 'machines', label: 'Machines', icon: Server },
 ] as const
 const PAGE: Record<View, { title: string; description: string }> = {
   overview: { title: 'Overview', description: 'Jobs, machines and recent activity in this workspace.' },
   jobs: { title: 'Jobs', description: 'Optimization models submitted from this account, with their status and results.' },
+  benchmarks: { title: 'Benchmarks', description: 'Run public test sets on your machine right now and compare every answer and timing with HiGHS.' },
   machines: { title: 'Machines', description: 'Computers paired with this workspace. Every solve runs on one of them.' },
   account: { title: 'Account', description: 'Profile, sign-in method and workspace usage.' },
 }
@@ -367,6 +370,7 @@ export function CloudDashboard({ user }: { user: User }) {
             </div>
             : <EmptyState icon={Server} title="No machines connected yet" text="Run the connector where your hardware is. This website routes jobs and stores results; it never solves them." action={<button className="primary-button" onClick={() => setDialog('machine')}><Plus size={15} />Connect machine</button>} />}
         </section>}
+        {view === 'benchmarks' && <BenchmarkLab machines={data.workers} />}
         {view === 'account' && <AccountPage user={user} data={data} ready={ready} />}
         <footer className="workspace-footer">
           <span className={`status-dot ${connected ? 'is-online' : ''}`} />
