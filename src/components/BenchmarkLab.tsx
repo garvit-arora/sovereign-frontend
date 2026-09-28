@@ -48,8 +48,8 @@ export function BenchmarkLab({ machines }: { machines: Machine[] }) {
     setPreset(id)
     setDatasets(new Set(p.datasets))
     setProfiles(new Set(p.profiles))
-    if (p.device) setDevice(p.device)
-    if (p.timeLimitSeconds) setLimit(p.timeLimitSeconds)
+    setDevice(p.device ?? 'cpu')
+    setLimit(p.timeLimitSeconds ?? 30)
   }, [])
 
   const loadRuns = useCallback(async () => {
@@ -106,6 +106,8 @@ export function BenchmarkLab({ machines }: { machines: Machine[] }) {
 
   const online = machines.filter(m => m.online)
   const highsReady = online.some(m => m.capabilities.reference_solvers?.includes('highs') && (!target || m.id === target))
+  const gpuMachine = online.find(m => m.capabilities.cuda_available && (!target || m.id === target))
+  const gpuPreset = catalogue?.presets.find(p => p.device === 'cuda')
   const kindOf = useMemo(() => new Map((catalogue?.datasets ?? []).map(d => [d.id, (d.shape.problem_type ?? 'LP').toUpperCase() as Kind])), [catalogue])
   const plannedJobs = useMemo(() => {
     let n = 0
@@ -241,7 +243,12 @@ export function BenchmarkLab({ machines }: { machines: Machine[] }) {
           <p>Sovereign jobs run on any machine. HiGHS reference jobs only go to a machine that reports HiGHS; until one connects they stay queued. On Windows, <code>sovereign-compute</code> 0.4.0 and later include HiGHS, so update the connector and connect again:</p>
           <pre className="bench-command">{`npm install -g sovereign-compute@0.4.0\nsovereign connect --server ${COORDINATOR}`}</pre>
         </div>}
-        {device === 'cuda' && online.length > 0 && !online.some(m => m.capabilities.cuda_available && (!target || m.id === target)) && <p className="info-note">No CUDA-ready machine is online. GPU jobs will wait in the queue; simplex, Frank-Wolfe and branch-and-bound jobs still run on the CPU.</p>}
+        {device === 'cpu' && gpuMachine && gpuPreset && preset !== gpuPreset.id && <div className="info-note">
+          <strong>{gpuMachine.name} has a CUDA GPU{gpuMachine.capabilities.gpu_name ? ` (${gpuMachine.capabilities.gpu_name})` : ''}</strong>
+          <p>This run is set to CPU, so every job runs on the CPU. The {gpuPreset.label} preset runs interior point on the GPU and on the CPU for the same large models, so you can compare them.</p>
+          <button type="button" className="quiet-button" onClick={() => applyPreset(gpuPreset.id, catalogue)}>Use {gpuPreset.label}</button>
+        </div>}
+        {device === 'cuda' && online.length > 0 && !gpuMachine && <p className="info-note">No CUDA-ready machine is online. GPU jobs will wait in the queue; simplex, Frank-Wolfe and branch-and-bound jobs still run on the CPU.</p>}
         {device !== 'cpu' && <p className="info-note">CUDA runs the dense factorization inside LP and QP interior point, the main cost of each iteration. On the CPU, LP and QP interior point factor a sparse system instead, which is often faster when the model is sparse. Automatic routing sends large models to a GPU machine and lets the engine pick the faster of the two. Simplex, Frank-Wolfe and branch-and-bound always run on the CPU. Each result reports how many GPU operations it actually executed.</p>}
         <div className="bench-setup-footer">
           <span className="muted">{plannedJobs} jobs{reference ? ', including one HiGHS reference per model' : ''}</span>
