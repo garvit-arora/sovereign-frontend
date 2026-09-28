@@ -21,7 +21,8 @@ const SUITE_NOTE: Record<string, string> = {
   'Synthetic scale': 'Same structure, growing size.',
   'Industrial example': 'Repository examples, not proprietary data.',
   'QP example': 'Convex quadratic objectives.',
-  'GPU showcase': 'Large enough for CUDA to beat the CPU.',
+  'GPU showcase': 'Dense enough for CUDA to matter.',
+  'Sparse scale': 'Thousands of rows; sparse factorization.',
 }
 const when = (seconds: number) => new Date(seconds * 1000).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
@@ -241,7 +242,7 @@ export function BenchmarkLab({ machines }: { machines: Machine[] }) {
           <pre className="bench-command">{`pip install highspy\ncurl -o sovereign-worker.py ${COORDINATOR}/worker.py\npython sovereign-worker.py --server ${COORDINATOR} --engine <path to sovereign.exe> --pair`}</pre>
         </div>}
         {device === 'cuda' && online.length > 0 && !online.some(m => m.capabilities.cuda_available && (!target || m.id === target)) && <p className="info-note">No CUDA-ready machine is online. GPU jobs will wait in the queue; simplex, Frank-Wolfe and branch-and-bound jobs still run on the CPU.</p>}
-        {device !== 'cpu' && <p className="info-note">CUDA runs the dense factorization inside LP and QP interior point, the main cost of each iteration. Automatic routing uses the GPU once that system reaches 400 rows. Simplex, Frank-Wolfe and branch-and-bound always run on the CPU. Each result reports how many GPU operations it actually executed.</p>}
+        {device !== 'cpu' && <p className="info-note">CUDA runs the dense factorization inside LP and QP interior point, the main cost of each iteration. On the CPU, LP interior point factors a sparse system instead, which is often faster when the model is sparse. Automatic routing sends large models to a GPU machine and lets the engine pick the faster of the two. Simplex, Frank-Wolfe and branch-and-bound always run on the CPU. Each result reports how many GPU operations it actually executed.</p>}
         <div className="bench-setup-footer">
           <span className="muted">{plannedJobs} jobs{reference ? ', including one HiGHS reference per model' : ''}</span>
           <button className="primary-button" disabled={busy || !plannedJobs} onClick={() => void start()}>{busy ? <Loader2 size={15} className="spin" /> : <Play size={15} />}Start run</button>

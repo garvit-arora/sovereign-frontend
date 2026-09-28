@@ -6,7 +6,7 @@ import {
 
 const W = 560, H = 330, PAD = { left: 58, right: 18, top: 18, bottom: 46 }
 const FLOOR = 1e-4
-const SWEEP_SUITES = new Set(['Synthetic scale', 'GPU showcase'])
+const SWEEP_SUITES = new Set(['Synthetic scale', 'GPU showcase', 'Sparse scale'])
 
 function decades(values: number[]) {
   const lo = Math.floor(Math.log10(Math.max(FLOOR, Math.min(...values))))

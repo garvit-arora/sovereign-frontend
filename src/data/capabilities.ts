@@ -56,8 +56,8 @@ export const CAPABILITIES: Capability[] = [
       },
       {
         name: 'Interior-point LP',
-        level: 'limited',
-        note: 'Converges, but the termination test uses average complementarity, which is too loose on large sparse LPs. Being reworked.',
+        level: 'ready',
+        note: 'Mehrotra predictor-corrector. The normal equations are factored once per iteration by a sparse LDL^T with minimum-degree ordering, or as a dense system on the GPU. Solves a 10,200-row planning LP in about 1 s, matching HiGHS.',
       },
       {
         name: 'Basis factorization',
@@ -82,7 +82,7 @@ export const CAPABILITIES: Capability[] = [
       {
         name: 'CUDA backend',
         level: 'ready',
-        note: 'Loads the NVIDIA driver at run time, so any machine with an NVIDIA GPU can use it without installing the CUDA toolkit. Interior point for LP and QP factors its dense system on the GPU: 8.6x faster at 1,000 rows and 32x at 1,500 on an RTX 2050. Simplex, Frank-Wolfe and branch-and-bound stay on the CPU.',
+        note: 'Loads the NVIDIA driver at run time, so any machine with an NVIDIA GPU can use it without installing the CUDA toolkit. Interior point for LP and QP factors its dense system on the GPU: 10x faster than the CPU dense LU at 1,000 rows and 21x at 1,500 on an RTX 2050. For sparse LPs the CPU sparse factorization is often faster, so automatic mode picks per model. Simplex, Frank-Wolfe and branch-and-bound stay on the CPU.',
       },
     ],
   },
