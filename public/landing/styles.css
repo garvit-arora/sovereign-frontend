@@ -298,6 +298,10 @@ body {
   position: relative;
   z-index: 2;
   background: var(--bg);
+  /* Slide-in elements start 40px off to the side; mobile browsers widen the
+     layout viewport to include them unless they are clipped here. */
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .scope-strip {
@@ -439,6 +443,12 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: clamp(28px, 5vw, 56px);
   align-items: center;
+}
+
+/* Grid items default to min-width: auto, so the install command's long line
+   would widen the column (and the page) instead of scrolling in its box. */
+.split-grid > * {
+  min-width: 0;
 }
 
 .split-copy code {
