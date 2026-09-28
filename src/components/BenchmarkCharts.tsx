@@ -6,6 +6,7 @@ import {
 
 const W = 560, H = 330, PAD = { left: 58, right: 18, top: 18, bottom: 46 }
 const FLOOR = 1e-4
+const SWEEP_SUITES = new Set(['Synthetic scale', 'GPU showcase'])
 
 function decades(values: number[]) {
   const lo = Math.floor(Math.log10(Math.max(FLOOR, Math.min(...values))))
@@ -106,18 +107,21 @@ export function ScalingChart({ rows }: { rows: BenchRow[] }) {
   const x = (v: number) => PAD.left + (Math.log10(v) - xr[0]) / (xr[1] - xr[0]) * (W - PAD.left - PAD.right)
   const y = logScale(yr, H - PAD.bottom, PAD.top)
   const series = new Map<string, BenchRow[]>()
-  for (const r of points.filter(p => p.suite === 'Synthetic scale')) series.set(r.profile, [...(series.get(r.profile) ?? []), r])
-  const highsLine = references.filter(r => r.suite === 'Synthetic scale').sort((a, b) => a.shape.nonzeros! - b.shape.nonzeros!)
+  for (const r of points.filter(p => SWEEP_SUITES.has(p.suite))) {
+    const key = `${r.suite}|${r.profile}`
+    series.set(key, [...(series.get(key) ?? []), r])
+  }
+  const highsLines = [...SWEEP_SUITES].map(suite => references.filter(r => r.suite === suite).sort((a, b) => a.shape.nonzeros! - b.shape.nonzeros!))
   return <figure className="chart">
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Solve time against number of nonzeros, logarithmic axes">
       <Axes x={x} y={y} xr={xr} yr={yr} xLabel="Model size: constraint nonzeros (log scale)" yLabel="Solve time (log scale)" xTick={count} />
-      {[...series].map(([profile, list]) => {
+      {[...series].map(([key, list]) => {
         const sorted = [...list].sort((a, b) => a.shape.nonzeros! - b.shape.nonzeros!)
-        return sorted.length > 1 && <polyline key={profile} fill="none" stroke={PROFILE_COLORS[profile] ?? '#555'} strokeWidth={1.6} strokeOpacity={0.55}
+        return sorted.length > 1 && <polyline key={key} fill="none" stroke={PROFILE_COLORS[sorted[0].profile] ?? '#555'} strokeWidth={1.6} strokeOpacity={0.55}
           points={sorted.map(r => `${x(r.shape.nonzeros!)},${y(r.runtimeSeconds!)}`).join(' ')} />
       })}
-      {highsLine.length > 1 && <polyline fill="none" stroke={HIGHS_COLOR} strokeWidth={1.6} strokeDasharray="4 3"
-        points={highsLine.map(r => `${x(r.shape.nonzeros!)},${y(r.reference!.runtimeSeconds!)}`).join(' ')} />}
+      {highsLines.map((line, i) => line.length > 1 && <polyline key={`highs-${i}`} fill="none" stroke={HIGHS_COLOR} strokeWidth={1.6} strokeDasharray="4 3"
+        points={line.map(r => `${x(r.shape.nonzeros!)},${y(r.reference!.runtimeSeconds!)}`).join(' ')} />)}
       {references.map(r => {
         const cx = x(r.shape.nonzeros!), cy = y(r.reference!.runtimeSeconds!)
         return <rect key={`ref-${r.dataset}`} x={cx - 4.5} y={cy - 4.5} width={9} height={9} transform={`rotate(45 ${cx} ${cy})`} fill={HIGHS_COLOR} className="chart-point">

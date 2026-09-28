@@ -4,7 +4,10 @@ export type Shape = { columns?: number; rows?: number; nonzeros?: number; intege
 
 export type LabDataset = { id: string; suite: string; source: string; modelFormat: string; shape: Shape }
 export type LabProfile = { id: string; label: string; kind: Kind; cpuOnly: boolean }
-export type LabPreset = { id: string; label: string; description: string; datasets: string[]; profiles: string[] }
+export type LabPreset = {
+  id: string; label: string; description: string; datasets: string[]; profiles: string[]
+  device?: 'cpu' | 'cuda' | 'auto'; timeLimitSeconds?: number
+}
 export type LabCatalogue = { datasets: LabDataset[]; profiles: LabProfile[]; presets: LabPreset[] }
 
 export type Reference = {
@@ -53,6 +56,8 @@ export const PROFILE_COLORS: Record<string, string> = {
   milp_bb: '#b7791f',
   qp_ipm: '#0e7490',
   qp_fw: '#9d4edd',
+  lp_ipm_cpu: '#64748b',
+  qp_ipm_cpu: '#a16207',
 }
 export const HIGHS_COLOR = '#8a8d94'
 

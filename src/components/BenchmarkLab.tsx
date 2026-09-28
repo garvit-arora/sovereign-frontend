@@ -21,6 +21,7 @@ const SUITE_NOTE: Record<string, string> = {
   'Synthetic scale': 'Same structure, growing size.',
   'Industrial example': 'Repository examples, not proprietary data.',
   'QP example': 'Convex quadratic objectives.',
+  'GPU showcase': 'Large enough for CUDA to beat the CPU.',
 }
 const when = (seconds: number) => new Date(seconds * 1000).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
@@ -46,6 +47,8 @@ export function BenchmarkLab({ machines }: { machines: Machine[] }) {
     setPreset(id)
     setDatasets(new Set(p.datasets))
     setProfiles(new Set(p.profiles))
+    if (p.device) setDevice(p.device)
+    if (p.timeLimitSeconds) setLimit(p.timeLimitSeconds)
   }, [])
 
   const loadRuns = useCallback(async () => {
