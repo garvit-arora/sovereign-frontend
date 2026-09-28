@@ -41,7 +41,7 @@ const FILTERS = [
   { id: 'FAILED', label: 'Failed' },
   { id: 'CANCELLED', label: 'Cancelled' },
 ]
-const CONNECTOR_VERSION = '0.2.0'
+const CONNECTOR_VERSION = '0.3.0'
 const CONNECTOR_INSTALL = `npm install -g sovereign-compute@${CONNECTOR_VERSION}`
 const terminal = (state: string) => ['COMPLETED', 'FAILED', 'CANCELLED'].includes(state)
 const nice = (text: string) => text.toLowerCase().replaceAll('_', ' ').replace(/^./, x => x.toUpperCase())
