@@ -124,6 +124,41 @@ function productionPlanning() {
   })
 }
 
+// Seeded so every visitor loads the same model and the stated optimum stays true.
+function mulberry32(seed: number) {
+  return () => {
+    seed = (seed + 0x6d2b79f5) | 0
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+// Each product draws on six of the plant's shared resources (line hours, raw materials, utilities,
+// labour shifts), in units per tonne. Synthetic data: sized like a multi-plant weekly plan.
+function plantProductMix() {
+  const products = 2200
+  const resources = 1500
+  const perProduct = 6
+  const rand = mulberry32(26119)
+  const uniform = (lo: number, hi: number, digits: number) => round(lo + (hi - lo) * rand(), digits)
+  const product = (j: number) => `product_${String(j + 1).padStart(4, '0')}`
+  const usage: Array<Record<string, number>> = Array.from({ length: resources }, () => ({}))
+  for (let j = 0; j < products; j++) {
+    const picked = new Set<number>()
+    while (picked.size < perProduct) picked.add(Math.floor(rand() * resources))
+    for (const i of picked) usage[i][product(j)] = uniform(0.5, 3, 3)
+  }
+  return JSON.stringify({
+    problem_type: 'LP',
+    sense: 'maximize',
+    variables: Array.from({ length: products }, (_, j) => continuous(product(j))),
+    objective: { linear: Object.fromEntries(Array.from({ length: products }, (_, j) => [product(j), uniform(1, 10, 3)])) },
+    constraints: usage.map((linear, i) => row(`resource_${String(i + 1).padStart(4, '0')}`, linear, '<=', uniform(50, 150, 2))),
+  })
+}
+let plantProductMixModel: string | undefined
+
 function transportation() {
   const supply = { plant_north: 300, plant_central: 400, plant_south: 250 }
   const demand = { city_a: 200, city_b: 250, city_c: 225, city_d: 175 }
@@ -549,6 +584,7 @@ export const EXAMPLES: ExampleModel[] = [
   { id: 'crude-blending', title: 'Crude oil blending', kind: 'LP', group: 'industrial', format: 'json', description: 'Choose a 120 kb/d crude slate from five crudes at the lowest cost while keeping the blend within sulfur and API gravity limits. Optimum: 9,627.43 ($k per day).', model: crudeBlending() },
   { id: 'refinery-planning', title: 'Refinery production plan', kind: 'LP', group: 'industrial', format: 'json', description: 'Run a crude unit, catalytic cracker and reformer to maximise daily margin under unit capacities, product demand and a diesel contract. Optimum: 1,307.19 ($k per day).', model: refineryPlanning() },
   { id: 'production-planning', title: 'Seasonal fertiliser production', kind: 'LP', group: 'industrial', format: 'json', description: 'Plan four quarters of urea and DAP output with overtime and inventory to meet kharif and rabi demand at the lowest cost. Optimum: 32,905.6.', model: productionPlanning() },
+  { id: 'plant-product-mix', title: 'Multi-plant product mix (large)', kind: 'LP', group: 'industrial', format: 'json', description: 'Set weekly output for 2,200 products that share 1,500 capacity-limited resources (line hours, raw materials, utilities, labour shifts) to maximise contribution. Synthetic data from a fixed seed. Optimum: 89,397.09.', get model() { return (plantProductMixModel ??= plantProductMix()) } },
   { id: 'transportation', title: 'Plant-to-city freight', kind: 'LP', group: 'industrial', format: 'json', description: 'Ship from three plants to four cities, meeting demand within supply at the lowest freight cost. Optimum: 3,175.', model: transportation() },
   { id: 'unit-commitment', title: 'Power unit commitment', kind: 'MILP', group: 'industrial', format: 'json', description: 'Decide which of three generators run in each 4-hour block and at what output, covering demand and a 10% reserve with start-up and no-load costs. Optimum: $269,060 per day.', model: unitCommitment() },
   { id: 'network-design', title: 'Distribution network design', kind: 'MILP', group: 'industrial', format: 'json', description: 'Decide which of three warehouses to open and how to serve four stores, trading fixed cost against shipping. Optimum: 28,030.', model: networkDesign() },
