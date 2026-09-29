@@ -5,7 +5,7 @@ import {
   Clock3, Copy, Cpu, FileCode2, Gauge, Inbox, LayoutGrid, ListChecks, Loader2, Menu, Monitor, Plus, Search, Server, ShieldCheck,
   Terminal, Trash2, Unplug, Upload, type LucideIcon,
 } from 'lucide-react'
-import { EXAMPLES } from '@/lib/examples'
+import { EXAMPLES, EXAMPLE_GROUPS, type ExampleGroup } from '@/lib/examples'
 import { logout } from '@/lib/firebase'
 import { pathForView, viewFromPath, type AppView } from '@/lib/routes'
 import { userDisplayName } from '@/lib/user'
@@ -50,7 +50,6 @@ const when = (seconds: number) => new Date(seconds * 1000).toLocaleString(undefi
 const formatNumber = (n?: number | null) => n == null ? '—' : Number(n.toPrecision(8)).toLocaleString()
 const deviceLabel = (device: string) => device === 'cuda' ? 'GPU (CUDA)' : device === 'auto' ? 'Automatic' : 'CPU'
 const problemKind = (job: Job) => job.routing?.shape?.problem_type?.toUpperCase()
-const KIND_LABEL = { LP: 'Linear programs', MILP: 'Mixed-integer programs', QP: 'Quadratic programs' } as const
 function ago(seconds: number) {
   const diff = Math.max(0, Date.now() / 1000 - seconds)
   if (diff < 60) return 'Just now'
@@ -549,9 +548,9 @@ function NewJob({ machines, onClose, onCreated }: { machines: Machine[]; onClose
         <label htmlFor="model-input">Model</label>
         <select className="example-select" aria-label="Load an example model" value={exampleId} onChange={e => loadExample(e.target.value)}>
           <option value="">Load an example…</option>
-          {(Object.keys(KIND_LABEL) as Array<keyof typeof KIND_LABEL>).map(kind => (
-            <optgroup key={kind} label={KIND_LABEL[kind]}>
-              {EXAMPLES.filter(e => e.kind === kind).map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
+          {(Object.keys(EXAMPLE_GROUPS) as ExampleGroup[]).map(group => (
+            <optgroup key={group} label={EXAMPLE_GROUPS[group]}>
+              {EXAMPLES.filter(e => e.group === group).map(e => <option key={e.id} value={e.id}>{e.title} ({e.kind})</option>)}
             </optgroup>
           ))}
         </select>
