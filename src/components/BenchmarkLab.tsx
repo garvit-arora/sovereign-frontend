@@ -24,6 +24,8 @@ const SUITE_NOTE: Record<string, string> = {
   'GPU showcase': 'Dense enough for CUDA to matter.',
   'Sparse scale': 'Thousands of rows; sparse factorization.',
 }
+const thousands = (n: number) => n >= 10000 ? `${Math.round(n / 1000)}k` : n.toLocaleString()
+const shortSize = (shape?: { columns?: number; rows?: number }) => shape?.columns ? `${thousands(shape.columns)} × ${thousands(shape.rows ?? 0)}` : ''
 const when = (seconds: number) => new Date(seconds * 1000).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
 export function BenchmarkLab({ machines }: { machines: Machine[] }) {
@@ -196,29 +198,31 @@ export function BenchmarkLab({ machines }: { machines: Machine[] }) {
         </div>
         <div className="bench-pickers">
           <div>
-            <h3>Models <span className="count-pill">{datasets.size}</span></h3>
+            <h3>Models <span className="count-pill">{datasets.size}</span><span className="bench-h3-note">Size: variables × rows</span></h3>
             <div className="bench-suites">
               {suites.map(([suite, items]) => <fieldset key={suite} className="bench-suite">
-                <legend>{suite}<small>{SUITE_NOTE[suite]}</small></legend>
-                {items.map(d => <label key={d.id} className="bench-check">
+                <legend><span>{suite}</span>{SUITE_NOTE[suite] && <small title={SUITE_NOTE[suite]}>{SUITE_NOTE[suite]}</small>}</legend>
+                {items.map(d => <label key={d.id} className="bench-check bench-model-check" title={`${d.id} · ${sizeLabel(d.shape)}`}>
                   <input type="checkbox" checked={datasets.has(d.id)} onChange={() => toggle(datasets, d.id, setDatasets)} />
-                  <span className="mono">{d.id}</span>
+                  <span className="mono bench-name">{d.id}</span>
                   <span className={`kind-tag kind-${(d.shape.problem_type ?? 'lp').toLowerCase()}`}>{(d.shape.problem_type ?? 'LP').toUpperCase()}</span>
-                  <small>{sizeLabel(d.shape)}</small>
+                  <small className="bench-size">{shortSize(d.shape)}</small>
                 </label>)}
               </fieldset>)}
             </div>
           </div>
           <div>
             <h3>Methods <span className="count-pill">{profiles.size}</span></h3>
-            {KIND_ORDER.map(kind => <fieldset key={kind} className="bench-suite">
-              <legend>{kind === 'LP' ? 'Linear programs' : kind === 'MILP' ? 'Mixed-integer programs' : 'Quadratic programs'}</legend>
-              {catalogue.profiles.filter(p => p.kind === kind).map(p => <label key={p.id} className="bench-check">
-                <input type="checkbox" checked={profiles.has(p.id)} onChange={() => toggle(profiles, p.id, setProfiles)} />
-                <span>{p.label}</span>
-                {p.cpuOnly && device !== 'cpu' && <span className="tag">CPU only</span>}
-              </label>)}
-            </fieldset>)}
+            <div className="bench-methods">
+              {KIND_ORDER.map(kind => <fieldset key={kind} className="bench-suite">
+                <legend><span>{kind === 'LP' ? 'Linear programs' : kind === 'MILP' ? 'Mixed-integer programs' : 'Quadratic programs'}</span></legend>
+                {catalogue.profiles.filter(p => p.kind === kind).map(p => <label key={p.id} className="bench-check">
+                  <input type="checkbox" checked={profiles.has(p.id)} onChange={() => toggle(profiles, p.id, setProfiles)} />
+                  <span>{p.label}</span>
+                  {p.cpuOnly && device !== 'cpu' && <span className="tag">CPU only</span>}
+                </label>)}
+              </fieldset>)}
+            </div>
             <div className="bench-options">
               <label>Compute<select value={device} onChange={e => setDevice(e.target.value)}>
                 <option value="cpu">CPU</option><option value="auto">Automatic routing</option><option value="cuda">GPU (CUDA)</option>

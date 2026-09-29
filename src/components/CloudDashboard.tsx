@@ -124,12 +124,26 @@ export function CloudDashboard({ user }: { user: User }) {
     return () => window.removeEventListener('keydown', key)
   }, [])
   const selectedId = selected?.id, selectedState = selected?.state
+  // A response that lands after the card was closed (or switched) must not reopen it.
+  const openRequest = useRef(0)
   useEffect(() => {
     if (!selectedId || !selectedState || terminal(selectedState)) return
-    const timer = setInterval(() => { request<Job>(`/api/jobs/${selectedId}`).then(setSelected).catch(e => setError(e.message)) }, 2000)
-    return () => clearInterval(timer)
+    let active = true
+    const timer = setInterval(() => {
+      request<Job>(`/api/jobs/${selectedId}`)
+        .then(job => { if (active) setSelected(current => current?.id === job.id ? job : current) })
+        .catch(e => { if (active) setError(e.message) })
+    }, 2000)
+    return () => { active = false; clearInterval(timer) }
   }, [selectedId, selectedState])
-  async function openJob(id: string) { try { setSelected(await request<Job>(`/api/jobs/${id}`)) } catch (e) { setError((e as Error).message) } }
+  async function openJob(id: string) {
+    const ticket = ++openRequest.current
+    try {
+      const job = await request<Job>(`/api/jobs/${id}`)
+      if (ticket === openRequest.current) setSelected(job)
+    } catch (e) { setError((e as Error).message) }
+  }
+  function closeJob() { openRequest.current++; setSelected(null) }
   async function cancelJob(id: string) {
     setBusy(true)
     try { await request(`/api/jobs/${id}/cancel`, 'POST', {}); await openJob(id); await refresh() }
@@ -407,7 +421,7 @@ export function CloudDashboard({ user }: { user: User }) {
       <div className="info-note">GPU acceleration currently covers sparse matrix multiplication. Other solver steps may still run on the CPU; each result reports the GPU operations it actually executed.</div>
       <div className="dialog-actions"><button className="primary-button" onClick={() => setDialog('machine')}>Connect a machine<ArrowRight size={15} /></button></div>
     </WorkspaceModal>}
-    {selected && <WorkspaceModal title={selected.name} onClose={() => setSelected(null)} wide>
+    {selected && <WorkspaceModal title={selected.name} onClose={closeJob} wide>
       <div className="result-top">
         <Status state={selected.state} />
         <span className="muted">Submitted {when(selected.created)}</span>
