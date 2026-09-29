@@ -241,7 +241,7 @@ export function BenchmarkLab({ machines }: { machines: Machine[] }) {
         {reference && online.length > 0 && !highsReady && <div className="info-note">
           <strong>No machine with HiGHS is online</strong>
           <p>Sovereign jobs run on any machine. HiGHS reference jobs only go to a machine that reports HiGHS; until one connects they stay queued. On Windows, <code>sovereign-compute</code> 0.4.0 and later include HiGHS, so update the connector and connect again:</p>
-          <pre className="bench-command">{`npm install -g sovereign-compute@0.4.0\nsovereign connect --server ${COORDINATOR}`}</pre>
+          <pre className="bench-command">{`npm install -g sovereign-compute@0.4.1\nsovereign connect --server ${COORDINATOR}`}</pre>
         </div>}
         {device === 'cpu' && gpuMachine && gpuPreset && preset !== gpuPreset.id && <div className="info-note">
           <strong>{gpuMachine.name} has a CUDA GPU{gpuMachine.capabilities.gpu_name ? ` (${gpuMachine.capabilities.gpu_name})` : ''}</strong>
