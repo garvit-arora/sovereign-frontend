@@ -224,7 +224,7 @@
               <span class="engine-badge">LP</span>
               <div>
                 <h3>Linear programming</h3>
-                <p>Revised simplex + primal-dual interior-point with Mehrotra-style corrector and presolve.</p>
+                <p>Dual simplex with steepest-edge pricing on a sparse LU, and a Mehrotra interior point on a sparse LDL<sup>T</sup> factorization, with presolve.</p>
               </div>
             </div>
             <div class="engine-row js-engine-row" data-accent="milp">
@@ -238,14 +238,14 @@
               <span class="engine-badge">QP</span>
               <div>
                 <h3>Convex QP</h3>
-                <p>Continuous quadratic optimization with numerical and solution checks.</p>
+                <p>Mehrotra interior point on a sparse quasi-definite KKT system, with Frank-Wolfe as a fallback and independent solution checks.</p>
               </div>
             </div>
             <div class="engine-row js-engine-row" data-accent="gpu">
               <span class="engine-badge">GPU</span>
               <div>
                 <h3>CUDA path</h3>
-                <p>Sparse matrix ops on GPU where applicable; remaining steps stay on CPU.</p>
+                <p>Interior point factors large dense systems on the GPU; the engine keeps sparse models on the CPU, where they run faster.</p>
               </div>
             </div>
           </div>
@@ -293,26 +293,26 @@
       <section class="section section-metrics">
         <div class="wrap js-section">
           <p class="label">Measured</p>
-          <h2 class="title">Prototype evidence so far</h2>
+          <h2 class="title">Benchmark evidence so far</h2>
           <div class="stat-bar">
             <div class="stat-item js-metric">
-              <span class="stat-num" data-count="17" data-suffix="" data-decimals="0">0</span>
-              <span class="stat-desc">GPU ops in verified LP test</span>
+              <span class="stat-num" data-count="49" data-suffix="/61" data-decimals="0">0</span>
+              <span class="stat-desc">Runs matching HiGHS, verified (Netlib, MIPLIB, industrial, scale)</span>
             </div>
             <div class="stat-item js-metric">
-              <span class="stat-num" data-count="0.358" data-suffix="s" data-decimals="3">0</span>
-              <span class="stat-desc">Median CPU @ 10k vars</span>
+              <span class="stat-num" data-count="0" data-suffix="" data-decimals="0">0</span>
+              <span class="stat-desc">Numerical errors in those 61 runs</span>
             </div>
             <div class="stat-item js-metric">
-              <span class="stat-num" data-count="0.432" data-suffix="s" data-decimals="3">0</span>
-              <span class="stat-desc">Median CUDA @ 10k vars</span>
+              <span class="stat-num" data-count="1" data-suffix="M" data-decimals="0">0</span>
+              <span class="stat-desc">Variables in a verified LP and QP solve</span>
             </div>
             <div class="stat-item js-metric">
-              <span class="stat-num" data-count="6" data-suffix="" data-decimals="0">0</span>
-              <span class="stat-desc">Digit pairing code</span>
+              <span class="stat-num" data-count="1.6" data-suffix="x" data-decimals="1">0</span>
+              <span class="stat-desc">CUDA speed-up on a 1,500-row dense LP</span>
             </div>
           </div>
-          <p class="note">GPU numbers prove execution and verification, not guaranteed speedup.</p>
+          <p class="note">Single runs on one laptop (RTX 2050), 30 s per job. The million-variable models are synthetic. The GPU helps only on large dense systems; sparse models run faster on the CPU.</p>
         </div>
       </section>
 
