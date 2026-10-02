@@ -20,6 +20,14 @@
       "destination": "/login/index.html"
     },
     {
+      "source": "/evidence",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/evidence/:path*",
+      "destination": "/index.html"
+    },
+    {
       "source": "/app",
       "destination": "/app/index.html"
     },

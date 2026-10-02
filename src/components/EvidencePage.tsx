@@ -1,0 +1,105 @@
+import { useMemo, useState, type ReactNode } from 'react'
+import { ArrowLeft, CheckCircle2, Clock3, ShieldCheck } from 'lucide-react'
+import '@/evidence.css'
+
+type Kind = 'LP' | 'MILP' | 'QP'
+type HardCase = { kind: Kind; name: string; sovereign: string; highs: string; why: string; state: 'ok' | 'slow' | 'fail' }
+
+const suites = [
+  ['Netlib LP', '91 standard linear programs', '90 / 91', '91 / 91', '0 / 0'],
+  ['MIPLIB 2017', '62 mixed-integer programs', '15 / 62', '38 / 62', '0 / 1'],
+  ['MIPLIB infeasible', '28 integer-infeasible models', '11 / 28', '15 / 28', '0 / 0'],
+  ['Maros–Mészáros QP', '138 convex quadratic programs', '128 / 138', '105 / 138', '0 / 2'],
+]
+
+const cases: HardCase[] = [
+  { kind: 'LP', name: 'cycle', sovereign: 'Solved · 2.43 s', highs: 'Solved · 0.3 s', why: '92% primal degeneracy', state: 'ok' },
+  { kind: 'LP', name: 'degen3', sovereign: 'Solved · 2.60 s', highs: 'Solved · 0.2 s', why: '52% primal degeneracy', state: 'ok' },
+  { kind: 'LP', name: 'greenbea', sovereign: 'Solved · 14.42 s', highs: 'Solved · 0.3 s', why: 'Published optimum disproved by verified points', state: 'ok' },
+  { kind: 'LP', name: 'pilot87', sovereign: 'Timeout · 300 s', highs: 'Solved · 14.0 s', why: 'Basis condition ≈ 5.3×10⁸', state: 'slow' },
+  { kind: 'LP', name: 'pilotnov', sovereign: 'Solved · 1.10 s', highs: 'Solved · 0.3 s', why: 'Basis condition ≈ 3.7×10¹²', state: 'ok' },
+  { kind: 'LP', name: 'd2q06c', sovereign: 'Solved · 32.41 s', highs: 'Solved · 1.1 s', why: 'Basis condition ≈ 7.5×10⁸', state: 'ok' },
+  { kind: 'MILP', name: 'pk1', sovereign: 'Timeout · 300 s', highs: 'Timeout · 300 s', why: 'Weak relaxation · 100% root gap', state: 'slow' },
+  { kind: 'MILP', name: 'sp150x300d', sovereign: 'Timeout · 300 s', highs: 'Solved · 0.1 s', why: 'Weak relaxation · 93% root gap', state: 'slow' },
+  { kind: 'MILP', name: 'p200x1188c', sovereign: 'Timeout · 300 s', highs: 'Solved · 1.3 s', why: 'Weak relaxation · 62% root gap', state: 'slow' },
+  { kind: 'MILP', name: 'qnet1', sovereign: 'Timeout · 300 s', highs: 'Solved · 1.0 s', why: 'Weak relaxation · 11% root gap', state: 'slow' },
+  { kind: 'MILP', name: 'enlight9', sovereign: 'Timeout · 300 s', highs: 'Solved · 12.6 s', why: 'LP feasible, integer problem infeasible', state: 'slow' },
+  { kind: 'QP', name: 'QPILOTNO', sovereign: 'Solved · 4.72 s', highs: 'Failed · 0.2 s', why: 'Difficult ill-conditioned QP', state: 'ok' },
+  { kind: 'QP', name: 'LISWET1', sovereign: 'Failed · 123.75 s', highs: 'Solved · 1.1 s', why: 'Interior-point convergence stress case', state: 'fail' },
+]
+
+const badgeClass = (value: string) => value.startsWith('Solved') ? 'is-good' : value.startsWith('Timeout') ? 'is-warn' : 'is-bad'
+
+export function EvidencePage() {
+  const [filter, setFilter] = useState<'All' | Kind>('All')
+  const visible = useMemo(() => filter === 'All' ? cases : cases.filter(item => item.kind === filter), [filter])
+
+  return <div className="evidence-page">
+    <header className="evidence-hero">
+      <div>
+        <a className="evidence-back" href="/"><ArrowLeft size={14} /> Sovereign</a>
+        <p className="evidence-kicker">Reproducible solver evidence</p>
+        <h1>Numbers you can inspect.</h1>
+        <p className="evidence-lede">A transparent benchmark record for an optimization engine built from scratch. Every claimed solution is independently checked; timeouts and failures remain visible.</p>
+      </div>
+      <div className="evidence-stamp">Baseline frozen<br /><strong>HiGHS 1.15.1 · 300 s</strong></div>
+    </header>
+
+    <section className="evidence-stat-grid">
+      <EvidenceStat value="319" label="public benchmark instances" detail="4 recognized suites" />
+      <EvidenceStat value="0" label="Sovereign wrong answers" detail="independent verification" />
+      <EvidenceStat value="128 / 138" label="convex QPs solved" detail="Maros–Mészáros" />
+      <EvidenceStat value="14 / 16" label="large Kennington LPs solved" detail="official EMPS conversion" />
+    </section>
+
+    <section className="evidence-panel">
+      <EvidenceHeading title="Coverage at a glance">“Solved” means the solver claimed the correct status, passed an independent feasibility/integrality check, and matched the published reference within the suite tolerance.</EvidenceHeading>
+      <div className="evidence-suite-list">
+        {suites.map(([name, detail, ours, highs, wrong]) => <div className="evidence-suite" key={name}>
+          <div><h3>{name}</h3><small>{detail}</small></div>
+          <EvidenceMetric value={ours} label="Sovereign" />
+          <EvidenceMetric value={highs} label="HiGHS" />
+          <EvidenceMetric value={wrong} label="Wrong answers" />
+        </div>)}
+      </div>
+    </section>
+
+    <section className="evidence-panel">
+      <EvidenceHeading title="Named hard instances">Representative degeneracy, conditioning, weak-relaxation and infeasibility cases selected for the robustness demonstration.</EvidenceHeading>
+      <div className="evidence-filters" role="toolbar" aria-label="Filter hard instances">
+        {(['All', 'LP', 'MILP', 'QP'] as const).map(item => <button className={filter === item ? 'active' : ''} key={item} onClick={() => setFilter(item)}>{item}</button>)}
+      </div>
+      <div className="evidence-table-wrap"><table className="evidence-table"><thead><tr><th>Family</th><th>Instance</th><th>Sovereign</th><th>HiGHS</th><th>Why it matters</th></tr></thead><tbody>
+        {visible.map(item => <tr key={item.name}><td>{item.kind}</td><td><strong>{item.name}</strong></td><td><span className={`evidence-badge ${badgeClass(item.sovereign)}`}>{item.sovereign}</span></td><td><span className={`evidence-badge ${badgeClass(item.highs)}`}>{item.highs}</span></td><td>{item.why}</td></tr>)}
+      </tbody></table></div>
+    </section>
+
+    <section className="evidence-panel">
+      <EvidenceHeading title="Large-scale Kennington LPs">The original Netlib files use historical compressed EMPS format. They were expanded with Netlib’s official <code>emps.c</code> converter before both solvers read the same standard MPS file.</EvidenceHeading>
+      <div className="evidence-table-wrap"><table className="evidence-table"><thead><tr><th>Result</th><th>Instances</th><th>Interpretation</th></tr></thead><tbody>
+        <tr><td><strong>14 / 16</strong></td><td>cre-a, cre-b, cre-c, cre-d, ken-07, ken-11, ken-13, osa-07, osa-14, osa-30, osa-60, pds-02, pds-06, pds-10</td><td><span className="evidence-badge is-good">Matched HiGHS objectives</span></td></tr>
+        <tr><td><strong>2 / 16</strong></td><td>ken-18, pds-20</td><td><span className="evidence-badge is-warn">Sovereign timeout · HiGHS solved</span></td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section className="evidence-panel evidence-two-col">
+      <div><EvidenceHeading title="Same conditions">One thread per solver, pinned CPU cores, the same 300-second wall-clock limit and MILP gap target of 1e-6.</EvidenceHeading><Info icon={ShieldCheck} title="Independent checker">Bounds, scaled row violations, integrality and objective values are recomputed outside both solvers.</Info></div>
+      <div><EvidenceHeading title="No hidden cleanup">TIMEOUT, FAILED and numerical-error results remain visible; they are not counted as solved.</EvidenceHeading><Info icon={Clock3} title="Published references">Netlib, MIPLIB and Maros–Mészáros references are used with documented tolerances.</Info></div>
+    </section>
+
+    <footer className="evidence-footer">Evidence snapshot for Sovereign · detailed source tables: <code>benchmarks/reports/COVERAGE.md</code> · external solvers are benchmark comparators only.</footer>
+  </div>
+}
+
+function EvidenceStat({ value, label, detail }: { value: string; label: string; detail: string }) {
+  return <div className="evidence-stat"><strong>{value}</strong><span>{label}</span><small>{detail}</small></div>
+}
+function EvidenceMetric({ value, label }: { value: string; label: string }) {
+  return <div className="evidence-metric"><strong>{value}</strong><small>{label}</small></div>
+}
+function EvidenceHeading({ title, children }: { title: string; children: ReactNode }) {
+  return <div className="evidence-heading"><h2>{title}</h2><p>{children}</p></div>
+}
+function Info({ icon: Icon, title, children }: { icon: typeof CheckCircle2; title: string; children: ReactNode }) {
+  return <div className="evidence-info"><Icon size={17} /><span><strong>{title}</strong>{children}</span></div>
+}

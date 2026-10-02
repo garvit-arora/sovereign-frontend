@@ -2,11 +2,19 @@ import { useEffect, useState } from 'react'
 import type { User } from 'firebase/auth'
 import { Loader2 } from 'lucide-react'
 import { CloudDashboard } from '@/components/CloudDashboard'
+import { EvidencePage } from '@/components/EvidencePage'
 import { SovereignMark } from '@/components/SovereignMark'
 import { waitForUser } from '@/lib/firebase'
 import '@/workspace.css'
 
 export default function App() {
+  if (window.location.pathname.replace(/\/$/, '') === '/evidence') {
+    return <EvidencePage />
+  }
+  return <AuthenticatedApp />
+}
+
+function AuthenticatedApp() {
   const [ready, setReady] = useState(false)
   const [user, setUser] = useState<User | null>(null)
 
