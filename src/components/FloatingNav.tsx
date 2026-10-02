@@ -31,15 +31,11 @@ export function FloatingNav() {
         <a href="#benchmarks" className={textButton}>
           Docs
         </a>
-        <a href="/evidence" className={textButton}>
-          Evidence
-        </a>
-
         <a
-          href="#runner"
+          href="/evidence"
           className="flex items-center gap-1 bg-white px-5 py-2 rounded-full text-[12px] font-semibold text-slate-800 border border-slate-200/60 shadow-sm hover:border-slate-300 transition-all"
         >
-          Get in touch
+          Evidence
           <ChevronRight className="h-3.5 w-3.5" />
         </a>
       </motion.nav>
