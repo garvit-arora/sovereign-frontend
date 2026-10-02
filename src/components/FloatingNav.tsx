@@ -31,6 +31,9 @@ export function FloatingNav() {
         <a href="#benchmarks" className={textButton}>
           Docs
         </a>
+        <a href="/evidence" className={textButton}>
+          Evidence
+        </a>
 
         <a
           href="#runner"
