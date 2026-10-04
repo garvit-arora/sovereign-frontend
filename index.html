@@ -28,7 +28,7 @@
         <a class="nav-link is-active" href="/">Home</a>
         <a class="nav-link" href="#platform">Platform</a>
         <a class="nav-link" href="#engine">Engine</a>
-        <a class="nav-link" href="#connect">Connect</a>
+        <a class="nav-link" href="/evidence">Evidence</a>
       </nav>
 
       <a class="signin" href="/login">Sign in</a>
@@ -355,7 +355,7 @@
           <nav aria-label="Footer">
             <a class="js-scroll" href="#platform">Platform</a>
             <a class="js-scroll" href="#engine">Engine</a>
-            <a class="js-scroll" href="#connect">Connect</a>
+            <a href="/evidence">Evidence</a>
             <a href="/login">Sign in</a>
           </nav>
           <p class="footer-note">SIH 26119 · Your compute, connected.</p>
@@ -368,7 +368,7 @@
         <a class="sheet-link is-active" href="/">Home</a>
         <a class="sheet-link js-scroll" href="#platform">Platform</a>
         <a class="sheet-link js-scroll" href="#engine">Engine</a>
-        <a class="sheet-link js-scroll" href="#connect">Connect</a>
+        <a class="sheet-link" href="/evidence">Evidence</a>
         <a class="sheet-signin" href="/login">Sign in</a>
       </div>
     </div>
@@ -377,6 +377,17 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
-    <script src="/landing/main.js"></script>
+    <script type="module">
+      if (window.location.pathname.replace(/\/$/, '') === '/evidence') {
+        document.querySelector('link[href="/landing/styles.css"]')?.remove()
+        document.body.innerHTML = '<div id="root"></div>'
+        document.title = 'Sovereign — Evidence'
+        await import('/src/evidence-entry.tsx')
+      } else {
+        const landing = document.createElement('script')
+        landing.src = '/landing/main.js'
+        document.body.appendChild(landing)
+      }
+    </script>
   </body>
 </html>
