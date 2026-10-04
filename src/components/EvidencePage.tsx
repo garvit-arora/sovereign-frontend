@@ -83,6 +83,31 @@ export function EvidencePage() {
     </section>
 
     <section className="evidence-panel">
+      <EvidenceHeading title="Where Sovereign is strongest">The strongest verified results are concentrated in large LP coverage, application-shaped models, and soundness checks. These are measured wins, not a claim of universal speed superiority.</EvidenceHeading>
+      <div className="evidence-suite-list">
+        <div className="evidence-suite">
+          <div><h3>Kennington LP coverage</h3><small>16 official large LPs · original EMPS converted to MPS</small></div>
+          <EvidenceMetric value="14 / 16" label="Sovereign solved" />
+          <EvidenceMetric value="14 / 16" label="objective matched" />
+          <EvidenceMetric value="2" label="timeouts retained" />
+        </div>
+        <div className="evidence-suite">
+          <div><h3>Application-shaped demos</h3><small>Synthetic refinery, blending and power-dispatch models</small></div>
+          <EvidenceMetric value="6 / 6" label="verified optimal runs" />
+          <EvidenceMetric value="3" label="model families" />
+          <EvidenceMetric value="0" label="verification failures" />
+        </div>
+        <div className="evidence-suite">
+          <div><h3>Measured timing win</h3><small>Kennington `pds-02` · one recorded run</small></div>
+          <EvidenceMetric value="0.143 s" label="Sovereign" />
+          <EvidenceMetric value="0.151 s" label="HiGHS" />
+          <EvidenceMetric value="1" label="faster recorded case" />
+        </div>
+      </div>
+      <p className="evidence-heading"><small>Application-shaped demos use clearly synthetic repository data; they are not industrial customer or MRPL data. Kennington results are official benchmark inputs. Every timeout remains listed in the source report.</small></p>
+    </section>
+
+    <section className="evidence-panel">
       <EvidenceHeading title="Named hard instances">Representative degeneracy, conditioning, weak-relaxation and infeasibility cases selected for the robustness demonstration.</EvidenceHeading>
       <div className="evidence-filters" role="toolbar" aria-label="Filter hard instances">
         {(['All', 'LP', 'MILP', 'QP'] as const).map(item => <button className={filter === item ? 'active' : ''} key={item} onClick={() => setFilter(item)}>{item}</button>)}
