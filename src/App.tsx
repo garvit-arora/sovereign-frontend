@@ -8,7 +8,8 @@ import { waitForUser } from '@/lib/firebase'
 import '@/workspace.css'
 
 export default function App() {
-  if (window.location.pathname.replace(/\/$/, '') === '/evidence') {
+  const path = window.location.pathname.replace(/\/$/, '')
+  if (path === '/evidence' || path === '/app/evidence') {
     return <EvidencePage />
   }
   return <AuthenticatedApp />

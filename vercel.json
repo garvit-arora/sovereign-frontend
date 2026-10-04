@@ -21,11 +21,11 @@
     },
     {
       "source": "/evidence",
-      "destination": "/index.html"
+      "destination": "/app/index.html"
     },
     {
       "source": "/evidence/:path*",
-      "destination": "/index.html"
+      "destination": "/app/index.html"
     },
     {
       "source": "/app",
